@@ -1,0 +1,6 @@
+[package]
+name = "pattern_api_v2"
+version = "0.1.0"
+authors = ["Marvin Löbel <loebel.marvin@gmail.com>"]
+
+[dependencies]
