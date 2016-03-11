@@ -190,7 +190,7 @@ where P: Pattern<&'a str>,
     v
 }
 
-pub fn is_malformed(v: &[SearchResult], haystack: &str) -> bool {
+pub fn is_malformed<H: SearchCursors>(v: &[SearchResult], haystack: H) -> bool {
     let mut found = false;
     for (i, pair) in v.windows(2).enumerate() {
         if pair[0].end() < pair[1].begin() {
@@ -218,7 +218,8 @@ pub fn is_malformed(v: &[SearchResult], haystack: &str) -> bool {
             found = true;
         }
 
-        if v[v.len() - 1].end() != haystack.len() {
+        let haystack = haystack.into_haystack();
+        if v[v.len() - 1].end() != H::haystack_len(haystack) {
             println!("Last interval did not end at end of haystack: [..., {:?}]", &v[v.len() - 1]);
             found = true;
         }

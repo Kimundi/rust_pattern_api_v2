@@ -33,7 +33,7 @@ pub trait Pattern<H: SearchCursors>: Sized {
 // for dealing with positions in a slice-like type
 // with pointer-like cursors
 // Logically, Haystack <= Cursor <= Back
-pub trait SearchCursors {
+pub trait SearchCursors: Sized {
     // For storing the bounds of the haystack.
     // Usually a combination of Memory address in form of a raw pointer or usize
     type Haystack: Copy;
@@ -53,6 +53,12 @@ pub trait SearchCursors {
     unsafe fn range_to_self(hs: Self::Haystack,
                             start: Self::Cursor,
                             end: Self::Cursor) -> Self;
+
+    fn haystack_len(hs: Self::Haystack) -> usize {
+        let haystack = hs;
+        let back = Self::cursor_at_back(haystack);
+        Self::offset_from_front(haystack, back)
+    }
 }
 
 pub unsafe trait Searcher<H: SearchCursors> {
