@@ -1,5 +1,7 @@
 #![feature(str_char)]
 
+// Name: Maybe SequencePattern ?
+
 pub mod core_traits;
 
 pub mod string;
