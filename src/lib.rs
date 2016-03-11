@@ -1,3 +1,5 @@
+#![feature(str_char)]
+
 pub mod core_traits;
 
 pub mod string;
