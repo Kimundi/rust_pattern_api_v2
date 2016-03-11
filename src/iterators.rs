@@ -22,7 +22,7 @@ pub fn match_indices<H, P>(haystack: H, pattern: P) -> Vec<(usize, H)>
 
 #[test]
 fn test_match_indices() {
-    assert_eq!(match_indices("banana", string::Ascii(b'a')),
+    assert_eq!(match_indices("banana", 'a'),
                 vec![(1, "a"), (3, "a"), (5, "a")]);
 
     let mut slice = &mut {*b"banana"}[..];
@@ -77,7 +77,7 @@ pub fn split<H, P>(haystack: H, pattern: P) -> Vec<H>
 
 #[test]
 fn test_split() {
-    assert_eq!(split("hangman", string::Ascii(b'a')),
+    assert_eq!(split("hangman", 'a'),
                 vec!["h", "ngm", "n"]);
 
     let mut slice = &mut {*b"hangman"}[..];

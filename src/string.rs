@@ -153,8 +153,6 @@ macro_rules! searcher_methods {
     }
 }
 
-pub struct Ascii(pub u8);
-
 trait CharEq {
     fn matches(&mut self, char) -> bool;
     fn only_ascii(&self) -> bool;
@@ -266,70 +264,6 @@ macro_rules! impl_both_mutability {
                 }
             }
 
-            use super::Ascii;
-
-            pub struct AsciiSearcher<'a> {
-                iter: Iter<'a>,
-                ascii: u8,
-            }
-
-            unsafe impl<'a> Searcher<$slice> for AsciiSearcher<'a> {
-                fn haystack(&self) -> ($cursor, $cursor) {
-                    self.iter.haystack
-                }
-
-                fn next_match(&mut self) -> Option<($cursor, $cursor)> {
-                    while self.iter.start != self.iter.end {
-                        unsafe {
-                            let p = self.iter.start;
-                            self.iter.start = self.iter.start.offset(1);
-
-                            if *p == self.ascii {
-                                return Some((p, self.iter.start));
-                            }
-                        }
-                    }
-                    None
-                }
-
-                fn next_reject(&mut self) -> Option<($cursor, $cursor)> {
-                    while self.iter.start != self.iter.end {
-                        unsafe {
-                            let p = self.iter.start;
-                            self.iter.start = self.iter.start.offset(1);
-
-                            if *p != self.ascii {
-                                return Some((p, self.iter.start));
-                            }
-                        }
-                    }
-                    None
-                }
-            }
-
-            impl<'a> Pattern<$slice> for Ascii {
-                type Searcher = AsciiSearcher<'a>;
-
-                fn into_searcher(self, haystack: $slice) -> Self::Searcher {
-                    assert!(self.0 < 128, "Ascii is only defined on byte values 0 - 127");
-
-                    AsciiSearcher {
-                        iter: Iter::new(haystack),
-                        ascii: self.0,
-                    }
-                }
-
-                fn is_prefix_of(self, haystack: $slice) -> bool {
-                    haystack.bytes().next() == Some(self.0)
-                }
-
-                fn is_suffix_of(self, haystack: $slice) -> bool
-                    where Self::Searcher: ReverseSearcher<$slice>
-                {
-                    haystack.bytes().next_back() == Some(self.0)
-                }
-            }
-
             //////////////////////////////////////////////////////////////////
             // Impl for a CharEq wrapper
             //////////////////////////////////////////////////////////////////
@@ -434,7 +368,7 @@ macro_rules! impl_both_mutability {
                 #[inline]
                 fn next_match_back(&mut self) -> Option<($cursor, $cursor)>  {
                     if self.ascii_only {
-                        while let Some(b) = self.iter.next() {
+                        while let Some(b) = self.iter.next_back() {
                             if self.char_eq.matches(b as char) {
                                 return Some(unsafe {
                                     (self.iter.end,
@@ -443,7 +377,7 @@ macro_rules! impl_both_mutability {
                             }
                         }
                     } else {
-                        while let Some(c) = utf8::next_code_point_reverse(|| self.iter.next()) {
+                        while let Some(c) = utf8::next_code_point_reverse(|| self.iter.next_back()) {
                             if self.char_eq.matches(c) {
                                 return Some(unsafe {
                                     (self.iter.end,
@@ -458,7 +392,7 @@ macro_rules! impl_both_mutability {
                 #[inline]
                 fn next_reject_back(&mut self) -> Option<($cursor, $cursor)>  {
                     if self.ascii_only {
-                        while let Some(b) = self.iter.next() {
+                        while let Some(b) = self.iter.next_back() {
                             if !self.char_eq.matches(b as char) {
                                 return Some(unsafe {
                                     (self.iter.end,
@@ -467,7 +401,7 @@ macro_rules! impl_both_mutability {
                             }
                         }
                     } else {
-                        while let Some(c) = utf8::next_code_point_reverse(|| self.iter.next()) {
+                        while let Some(c) = utf8::next_code_point_reverse(|| self.iter.next_back()) {
                             if !self.char_eq.matches(c) {
                                 return Some(unsafe {
                                     (self.iter.end,
