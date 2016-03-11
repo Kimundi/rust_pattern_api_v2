@@ -36,11 +36,11 @@ macro_rules! searcher_test {
 
             #[test]
             fn fwd_exact() {
-                cmp_search_to_vec(false, || $p, $h, Some(vec![$($e),*]));
+                cmp_search_to_vec(false, || $p, || $h, Some(vec![$($e),*]));
             }
             #[test]
             fn bwd_exact() {
-                cmp_search_to_vec(true, || $p, $h, Some(vec![$($e),*]));
+                cmp_search_to_vec(true, || $p, || $h, Some(vec![$($e),*]));
             }
         }
     };
@@ -53,8 +53,8 @@ macro_rules! searcher_test {
 
             #[test]
             fn fwd_and_bwd_valid() {
-                let left = &cmp_search_to_vec(false, || $p, $h, None);
-                let right = &cmp_search_to_vec(true, || $p, $h, None);
+                let left = &cmp_search_to_vec(false, || $p, || $h, None);
+                let right = &cmp_search_to_vec(true, || $p, || $h, None);
                 compare(left, right, $h);
             }
         }
@@ -68,11 +68,11 @@ macro_rules! searcher_test {
 
             #[test]
             fn fwd_exact() {
-                cmp_search_to_vec(false, || $p, $h, Some(vec![$($e),*]));
+                cmp_search_to_vec(false, || $p, || $h, Some(vec![$($e),*]));
             }
             #[test]
             fn bwd_exact() {
-                cmp_search_to_vec(true, || $p, $h, Some(vec![$($f),*]));
+                cmp_search_to_vec(true, || $p, || $h, Some(vec![$($f),*]));
             }
         }
     };
@@ -85,23 +85,25 @@ macro_rules! searcher_test {
 
             #[test]
             fn fwd_and_bwd_valid() {
-                let left = &cmp_search_to_vec(false, || $p, $h, None);
-                let right = &cmp_search_to_vec(true, || $p, $h, None);
+                let left = &cmp_search_to_vec(false, || $p, || $h, None);
+                let right = &cmp_search_to_vec(true, || $p, || $h, None);
             }
         }
     };
 }
 
-pub fn cmp_search_to_vec<'a, P, F>(rev: bool,
-                                   pat: F,
-                                   haystack: &'a str,
-                                   right: Option<Vec<SearchResult>>) -> Vec<SearchResult>
-where P: Pattern<&'a str>,
-      P::Searcher: ReverseSearcher<&'a str>,
-      F: Fn() -> P,
+pub fn cmp_search_to_vec<'a, H, P, F, HF>(rev: bool,
+                                          mut pat: F,
+                                          mut haystack: HF,
+                                          right: Option<Vec<SearchResult>>) -> Vec<SearchResult>
+where H: SearchCursors,
+      P: Pattern<H>,
+      P::Searcher: ReverseSearcher<H>,
+      F: FnMut() -> P,
+      HF: FnMut() -> H,
 {
     let mut matches = {
-        let mut searcher = pat().into_searcher(haystack);
+        let mut searcher = pat().into_searcher(haystack());
         let mut v = vec![];
         loop {
             match if !rev {searcher.next_match()} else {searcher.next_match_back()} {
@@ -113,16 +115,16 @@ where P: Pattern<&'a str>,
             v.reverse();
         }
         v.into_iter().map(|(a, b)| {
-            let haystack = haystack.into_haystack();
+            let haystack = searcher.haystack();
             (
-                <&'a str>::offset_from_front(haystack, a),
-                <&'a str>::offset_from_front(haystack, b),
+                H::offset_from_front(haystack, a),
+                H::offset_from_front(haystack, b),
             )
-        })
+        }).collect::<Vec<_>>().into_iter()
     };
 
     let mut rejects = {
-        let mut searcher = pat().into_searcher(haystack);
+        let mut searcher = pat().into_searcher(haystack());
         let mut v = vec![];
         loop {
             match if !rev {searcher.next_reject()} else {searcher.next_reject_back()} {
@@ -134,12 +136,12 @@ where P: Pattern<&'a str>,
             v.reverse();
         }
         v.into_iter().map(|(a, b)| {
-            let haystack = haystack.into_haystack();
+            let haystack = searcher.haystack();
             (
-                <&'a str>::offset_from_front(haystack, a),
-                <&'a str>::offset_from_front(haystack, b),
+                H::offset_from_front(haystack, a),
+                H::offset_from_front(haystack, b),
             )
-        })
+        }).collect::<Vec<_>>().into_iter()
     };
 
     let mut v = vec![];
@@ -179,12 +181,12 @@ where P: Pattern<&'a str>,
 
     // Validate and emit diagnostics
 
-    if is_malformed(&v, haystack) {
+    if is_malformed(&v, haystack()) {
         panic!("searcher impl outputted invalid search results");
     }
 
     if let Some(right) = right {
-        compare(&v, &right, haystack);
+        compare(&v, &right, haystack());
     }
 
     v
@@ -228,7 +230,7 @@ pub fn is_malformed<H: SearchCursors>(v: &[SearchResult], haystack: H) -> bool {
     found
 }
 
-pub fn compare(left: &[SearchResult], right: &[SearchResult], haystack: &str) {
+pub fn compare<H: SearchCursors>(left: &[SearchResult], right: &[SearchResult], haystack: H) {
     if is_malformed(&right, haystack) {
         panic!("should-be search result test input is malformed, check test code for correctness");
     }
