@@ -883,10 +883,11 @@ struct TwoWaySearcher {
     /// critical factorization index for reversed needle
     crit_pos_back: usize,
     period: usize,
-    /// `byteset` is an extension (not part of the two way algorithm);
-    /// it's a 64-bit "fingerprint" where each set bit `j` corresponds
-    /// to a (byte & 63) == j present in the needle.
-    byteset: u64,
+    // TODO #1: Re-add with specialization for [u8] and str cases
+    // /// `byteset` is an extension (not part of the two way algorithm);
+    // /// it's a 64-bit "fingerprint" where each set bit `j` corresponds
+    // /// to a (byte & 63) == j present in the needle.
+    // byteset: u64,
 
     // variables
     position: usize,
@@ -971,7 +972,7 @@ struct TwoWaySearcher {
 
 */
 impl TwoWaySearcher {
-    fn new(needle: &[u8], end: usize) -> TwoWaySearcher {
+    fn new<T: Ord>(needle: &[T], end: usize) -> TwoWaySearcher {
         let (crit_pos_false, period_false) = TwoWaySearcher::maximal_suffix(needle, false);
         let (crit_pos_true, period_true) = TwoWaySearcher::maximal_suffix(needle, true);
 
@@ -1009,7 +1010,8 @@ impl TwoWaySearcher {
                 crit_pos: crit_pos,
                 crit_pos_back: crit_pos_back,
                 period: period,
-                byteset: Self::byteset_create(&needle[..period]),
+                // TODO #1: Re-add with specialization for [u8] and str cases
+                // byteset: Self::byteset_create(&needle[..period]),
 
                 position: 0,
                 end: end,
@@ -1028,7 +1030,8 @@ impl TwoWaySearcher {
                 crit_pos: crit_pos,
                 crit_pos_back: crit_pos,
                 period: cmp::max(crit_pos, needle.len() - crit_pos) + 1,
-                byteset: Self::byteset_create(needle),
+                // TODO #1: Re-add with specialization for [u8] and str cases
+                // byteset: Self::byteset_create(needle),
 
                 position: 0,
                 end: end,
@@ -1038,6 +1041,8 @@ impl TwoWaySearcher {
         }
     }
 
+    // TODO #1: Re-add with specialization for [u8] and str cases
+    /*
     #[inline]
     fn byteset_create(bytes: &[u8]) -> u64 {
         bytes.iter().fold(0, |a, &b| (1 << (b & 0x3f)) | a)
@@ -1047,6 +1052,7 @@ impl TwoWaySearcher {
     fn byteset_contains(&self, byte: u8) -> bool {
         (self.byteset >> ((byte & 0x3f) as usize)) & 1 != 0
     }
+    */
 
     // One of the main ideas of Two-Way is that we factorize the needle into
     // two halves, (u, v), and begin trying to find v in the haystack by scanning
@@ -1065,7 +1071,7 @@ impl TwoWaySearcher {
             // Check that we have room to search in
             // position + needle_last can not overflow if we assume slices
             // are bounded by isize's range.
-            let tail_byte = match haystack.get(self.position + needle_last) {
+            let _tail_byte = match haystack.get(self.position + needle_last) {
                 Some(&b) => b,
                 None => {
                     self.position = haystack.len();
@@ -1077,6 +1083,8 @@ impl TwoWaySearcher {
                 return S::rejecting(old_pos, self.position);
             }
 
+            // TODO #1: Re-add with specialization for [u8] and str cases
+            /*
             // Quickly skip by large portions unrelated to our substring
             if !self.byteset_contains(tail_byte) {
                 self.position += needle.len();
@@ -1085,6 +1093,7 @@ impl TwoWaySearcher {
                 }
                 continue 'search;
             }
+            */
 
             // See if the right part of the needle matches
             let start = if long_period { self.crit_pos }
@@ -1149,7 +1158,7 @@ impl TwoWaySearcher {
             // end - needle.len() will wrap around when there is no more room,
             // but due to slice length limits it can never wrap all the way back
             // into the length of haystack.
-            let front_byte = match haystack.get(self.end.wrapping_sub(needle.len())) {
+            let _front_byte = match haystack.get(self.end.wrapping_sub(needle.len())) {
                 Some(&b) => b,
                 None => {
                     self.end = 0;
@@ -1161,6 +1170,8 @@ impl TwoWaySearcher {
                 return S::rejecting(self.end, old_end);
             }
 
+            // TODO #1: Re-add with specialization for [u8] and str cases
+            /*
             // Quickly skip by large portions unrelated to our substring
             if !self.byteset_contains(front_byte) {
                 self.end -= needle.len();
@@ -1169,6 +1180,7 @@ impl TwoWaySearcher {
                 }
                 continue 'search;
             }
+            */
 
             // See if the left part of the needle matches
             let crit = if long_period { self.crit_pos_back }
@@ -1221,16 +1233,16 @@ impl TwoWaySearcher {
     //
     // For long period cases, the resulting period is not exact (it is too short).
     #[inline]
-    fn maximal_suffix(arr: &[u8], order_greater: bool) -> (usize, usize) {
+    fn maximal_suffix<T: Ord>(arr: &[T], order_greater: bool) -> (usize, usize) {
         let mut left = 0; // Corresponds to i in the paper
         let mut right = 1; // Corresponds to j in the paper
         let mut offset = 0; // Corresponds to k in the paper, but starting at 0
                             // to match 0-based indexing.
         let mut period = 1; // Corresponds to p in the paper
 
-        while let Some(&a) = arr.get(right + offset) {
+        while let Some(a) = arr.get(right + offset) {
             // `left` will be inbounds when `right` is.
-            let b = arr[left + offset];
+            let b = &arr[left + offset];
             if (a < b && !order_greater) || (a > b && order_greater) {
                 // Suffix is smaller, period is entire prefix so far.
                 right += offset + 1;
@@ -1267,8 +1279,8 @@ impl TwoWaySearcher {
     // a critical factorization.
     //
     // For long period cases, the resulting period is not exact (it is too short).
-    fn reverse_maximal_suffix(arr: &[u8], known_period: usize,
-                              order_greater: bool) -> usize
+    fn reverse_maximal_suffix<T: Ord>(arr: &[T], known_period: usize,
+                                      order_greater: bool) -> usize
     {
         let mut left = 0; // Corresponds to i in the paper
         let mut right = 1; // Corresponds to j in the paper
@@ -1278,8 +1290,8 @@ impl TwoWaySearcher {
         let n = arr.len();
 
         while right + offset < n {
-            let a = arr[n - (1 + right + offset)];
-            let b = arr[n - (1 + left + offset)];
+            let a = &arr[n - (1 + right + offset)];
+            let b = &arr[n - (1 + left + offset)];
             if (a < b && !order_greater) || (a > b && order_greater) {
                 // Suffix is smaller, period is entire prefix so far.
                 right += offset + 1;
