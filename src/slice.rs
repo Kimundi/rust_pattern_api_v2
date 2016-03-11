@@ -1,11 +1,10 @@
 use super::*;
 impl<'a> SearchCursors for &'a mut [u8] {
-    // Store address bounds as usize since aliasing interaction is unclear
     type Haystack = (*mut u8, *mut u8);
     type Cursor = *mut u8;
 
-    unsafe fn offset_from_start(haystack: Self::Haystack,
-                                begin: Self::Cursor) -> usize {
+    fn offset_from_front(haystack: Self::Haystack,
+                         begin: Self::Cursor) -> usize {
         begin as usize - haystack.0 as usize
     }
 
@@ -15,11 +14,16 @@ impl<'a> SearchCursors for &'a mut [u8] {
         ::std::slice::from_raw_parts_mut(start,
             end as usize - start as usize)
     }
-    unsafe fn cursor_at_front(hs: Self::Haystack) -> Self::Cursor {
-        hs.0 as *mut u8
+    fn cursor_at_front(hs: Self::Haystack) -> Self::Cursor {
+        hs.0
     }
-    unsafe fn cursor_at_back(hs: Self::Haystack) -> Self::Cursor {
-        hs.1 as *mut u8
+    fn cursor_at_back(hs: Self::Haystack) -> Self::Cursor {
+        hs.1
+    }
+    fn into_haystack(self) -> Self::Haystack {
+        unsafe {
+            (self.as_mut_ptr(), self.as_mut_ptr().offset(self.len() as isize))
+        }
     }
 }
 

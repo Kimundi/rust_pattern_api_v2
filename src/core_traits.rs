@@ -55,12 +55,14 @@ pub trait SearchCursors {
     // Usually a Memory address in form of a raw pointer or usize
     type Cursor: Copy + Eq + Ord;
 
-    unsafe fn offset_from_start(hs: Self::Haystack, begin: Self::Cursor) -> usize;
+    fn into_haystack(self) -> Self::Haystack;
+    fn offset_from_front(hs: Self::Haystack, begin: Self::Cursor) -> usize;
+    fn cursor_at_front(hs: Self::Haystack) -> Self::Cursor;
+    fn cursor_at_back(hs: Self::Haystack) -> Self::Cursor;
+
     unsafe fn range_to_self(hs: Self::Haystack,
                             start: Self::Cursor,
                             end: Self::Cursor) -> Self;
-    unsafe fn cursor_at_front(hs: Self::Haystack) -> Self::Cursor;
-    unsafe fn cursor_at_back(hs: Self::Haystack) -> Self::Cursor;
 }
 
 pub unsafe trait Searcher<H: SearchCursors> {

@@ -10,7 +10,7 @@ pub fn match_indices<H, P>(haystack: H, pattern: P) -> Vec<(usize, H)>
     while let Some((begin, end)) = searcher.next_match() {
         let haystack = searcher.haystack();
         unsafe {
-            let offset = H::offset_from_start(haystack, begin);
+            let offset = H::offset_from_front(haystack, begin);
             let slice = H::range_to_self(haystack, begin, end);
 
             ret.push((offset, slice));

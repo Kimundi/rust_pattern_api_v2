@@ -246,8 +246,12 @@ macro_rules! impl_both_mutability {
                 type Haystack = ($cursor, $cursor);
                 type Cursor = $cursor;
 
-                unsafe fn offset_from_start(haystack: Self::Haystack,
-                                            begin: Self::Cursor) -> usize {
+                fn into_haystack(self) -> Self::Haystack {
+                    $haystack_to_cursors(self)
+                }
+
+                fn offset_from_front(haystack: Self::Haystack,
+                                     begin: Self::Cursor) -> usize {
                     begin as usize - haystack.0 as usize
                 }
 
@@ -256,10 +260,10 @@ macro_rules! impl_both_mutability {
                                         end: Self::Cursor) -> Self {
                     ($cursors_to_haystack)(start, end)
                 }
-                unsafe fn cursor_at_front(hs: Self::Haystack) -> Self::Cursor {
+                fn cursor_at_front(hs: Self::Haystack) -> Self::Cursor {
                     hs.0
                 }
-                unsafe fn cursor_at_back(hs: Self::Haystack) -> Self::Cursor {
+                fn cursor_at_back(hs: Self::Haystack) -> Self::Cursor {
                     hs.1
                 }
             }
