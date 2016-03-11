@@ -50,9 +50,7 @@ pub fn split<H, P>(haystack: H, pattern: P) -> Vec<H>
 
     let haystack = searcher.haystack();
 
-    let mut last_end = Some(unsafe {
-        H::cursor_at_front(haystack)
-    });
+    let mut last_end = Some(H::cursor_at_front(haystack));
 
     while let Some((begin, end)) = searcher.next_match() {
         if let Some(last_end) = last_end {

@@ -5,16 +5,11 @@ pub trait Pattern<H: SearchCursors>: Sized {
     fn is_prefix_of(self, haystack: H) -> bool {
         let mut searcher = self.into_searcher(haystack);
 
-        // Safe because it is using the API as specified.
-        // Any memory unsafety comes from wrong implementation of the
-        // unsafe traits or methods.
-        unsafe {
-            // looking for first reject under the assumption that
-            // a search will have more misses than matches
-            searcher.next_reject()
-                    .map(|t| t.0 != H::cursor_at_front(searcher.haystack()))
-                    .unwrap_or(false)
-        }
+        // looking for first reject under the assumption that
+        // a search will have more misses than matches
+        searcher.next_reject()
+                .map(|t| t.0 != H::cursor_at_front(searcher.haystack()))
+                .unwrap_or(false)
     }
 
     fn is_suffix_of(self, haystack: H) -> bool
@@ -22,16 +17,11 @@ pub trait Pattern<H: SearchCursors>: Sized {
     {
         let mut searcher = self.into_searcher(haystack);
 
-        // Safe because it is using the API as specified.
-        // Any memory unsafety comes from wrong implementation of the
-        // unsafe traits or methods.
-        unsafe {
-            // looking for first reject under the assumption that
-            // a search will have more misses than matches
-            searcher.next_reject_back()
-                    .map(|t| t.1 != H::cursor_at_back(searcher.haystack()))
-                    .unwrap_or(false)
-        }
+        // looking for first reject under the assumption that
+        // a search will have more misses than matches
+        searcher.next_reject_back()
+                .map(|t| t.1 != H::cursor_at_back(searcher.haystack()))
+                .unwrap_or(false)
     }
 
     fn is_contained_in(self, haystack: H) -> bool {
