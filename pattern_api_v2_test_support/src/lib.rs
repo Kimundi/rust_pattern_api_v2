@@ -27,6 +27,7 @@ use SearchResult::{Match, Reject};
 
 #[macro_export]
 macro_rules! searcher_test {
+    // For testing if the results of a double ended searcher exactly match what is expected
     ($name:ident, $p:expr, $h:expr, double, is exact [$($e:expr,)*]) => {
         #[allow(unused_imports)]
         mod $name {
@@ -43,6 +44,7 @@ macro_rules! searcher_test {
             }
         }
     };
+    // For testing if the results of a double ended searcher are merely valid
     ($name:ident, $p:expr, $h:expr, double, is valid) => {
         #[allow(unused_imports)]
         mod $name {
@@ -57,6 +59,7 @@ macro_rules! searcher_test {
             }
         }
     };
+    // For testing if the results of a forward-reverse searcher exactly match what is expected
     ($name:ident, $p:expr, $h:expr, reverse, is exact [$($e:expr,)*], [$($f:expr,)*]) => {
         #[allow(unused_imports)]
         mod $name {
@@ -73,6 +76,7 @@ macro_rules! searcher_test {
             }
         }
     };
+    // For testing if the results of a forward-reverse searcher are merely valid
     ($name:ident, $p:expr, $h:expr, reverse, is valid) => {
         #[allow(unused_imports)]
         mod $name {
