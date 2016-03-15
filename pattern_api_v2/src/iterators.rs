@@ -1,5 +1,4 @@
 use super::*;
-use slice::Elem;
 
 pub fn match_indices<H, P>(haystack: H, pattern: P) -> Vec<(usize, H)>
     where H: SearchCursors,
@@ -23,6 +22,8 @@ pub fn match_indices<H, P>(haystack: H, pattern: P) -> Vec<(usize, H)>
 
 #[test]
 fn test_match_indices() {
+    use slice::Elem;
+
     assert_eq!(match_indices("banana", 'a'),
                 vec![(1, "a"), (3, "a"), (5, "a")]);
 
@@ -76,6 +77,8 @@ pub fn split<H, P>(haystack: H, pattern: P) -> Vec<H>
 
 #[test]
 fn test_split() {
+    use slice::Elem;
+
     assert_eq!(split("hangman", 'a'),
                 vec!["h", "ngm", "n"]);
 

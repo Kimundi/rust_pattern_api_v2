@@ -271,26 +271,22 @@ macro_rules! impl_both_mutability {
                 type FastSkipOptimization = NoOptimization;
 
                 fn next_valid_pos(hs: &Self::Haystack, pos: usize) -> Option<usize> {
-                    let s = unsafe {
-                        Self::haystack_as_slice(hs)
-                    };
+                    let s = Self::haystack_as_slice(hs);
                     s[pos..].iter().next().map(|_| pos + 1)
                 }
 
                 fn next_valid_pos_back(hs: &Self::Haystack, pos: usize) -> Option<usize> {
-                    let s = unsafe {
-                        Self::haystack_as_slice(hs)
-                    };
+                    let s = Self::haystack_as_slice(hs);
                     s[..pos].iter().next_back().map(|_| pos - 1)
                 }
 
                 fn haystack_as_slice<'t>(hs: &'t Self::Haystack) -> &'t [Self::NeedleElement] {
                     unsafe {
-                        Self::haystack_as_slice(hs)
+                        $cursors_to_haystack(hs.0, hs.1)
                     }
                 }
 
-                fn pos_is_valid(hs: &Self::Haystack, pos: usize) -> bool {
+                fn pos_is_valid(_: &Self::Haystack, _: usize) -> bool {
                     true
                 }
 
