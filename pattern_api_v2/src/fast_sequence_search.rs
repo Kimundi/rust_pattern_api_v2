@@ -10,8 +10,8 @@ use std::usize;
 pub trait OrdSlice: SearchCursors {
     type NeedleElement: Ord;
 
-    fn next_valid_pos(hs_iter: &mut Iter<Self>, pos: usize) -> Option<usize>;
-    fn next_valid_pos_back(hs_iter: &mut Iter<Self>, pos: usize) -> Option<usize>;
+    fn next_valid_pos(hs: &Self::Haystack, pos: usize) -> Option<usize>;
+    fn next_valid_pos_back(hs: &Self::Haystack, pos: usize) -> Option<usize>;
 
     fn haystack_as_slice(hs: &Self::Haystack) -> &[Self::NeedleElement];
 
@@ -50,7 +50,7 @@ enum SearchStep {
 // Pattern<&'a [T]> for &'b [T]
 // Pattern<&'a mut [T]> for &'b [T]
 
-pub struct OrdSlicePattern<'b, H: OrdSlice>(&'b [H::NeedleElement])
+pub struct OrdSlicePattern<'b, H: OrdSlice>(pub &'b [H::NeedleElement])
     where H::NeedleElement: 'b;
 
 /// Non-allocating substring search.
@@ -59,20 +59,20 @@ pub struct OrdSlicePattern<'b, H: OrdSlice>(&'b [H::NeedleElement])
 /// boundary.
 impl<'b, H: OrdSlice> OrdSlicePattern<'b, H> {
     #[inline]
-    fn into_searcher(self, haystack: H) -> OrdSeqSearcher<'b, H> {
+    pub fn into_searcher(self, haystack: H) -> OrdSeqSearcher<'b, H> {
         OrdSeqSearcher::new(haystack, self.0)
     }
 
     /// Checks whether the pattern matches at the front of the haystack
     #[inline]
-    fn is_prefix_of(self, haystack: H) -> bool {
+    pub fn is_prefix_of(self, haystack: H) -> bool {
         let hs = haystack.into_haystack();
         H::starts_with(&hs, &self.0)
     }
 
     /// Checks whether the pattern matches at the back of the haystack
     #[inline]
-    fn is_suffix_of(self, haystack: H) -> bool {
+    pub fn is_suffix_of(self, haystack: H) -> bool {
         let hs = haystack.into_haystack();
         H::ends_with(&hs, &self.0)
     }
@@ -110,7 +110,7 @@ impl<H: SearchCursors> Iter<H> {
 
 #[derive(Clone)]
 /// Associated type for `<&str as Pattern<&'a str>>::Searcher`.
-struct OrdSeqSearcher<'b, H: OrdSlice>
+pub struct OrdSeqSearcher<'b, H: OrdSlice>
     where H::NeedleElement: 'b
 {
     iter: Iter<H>,
@@ -167,7 +167,7 @@ impl<'b, H: OrdSlice> OrdSeqSearcher<'b, H> {
                 let is_match = searcher.is_match_fw;
                 searcher.is_match_fw = !searcher.is_match_fw;
                 let pos = searcher.position;
-                match H::next_valid_pos(&mut self.iter, pos) {
+                match H::next_valid_pos(&self.iter.haystack, pos) {
                     _ if is_match => SearchStep::Match(pos, pos),
                     None => SearchStep::Done,
                     Some(new_pos) => {
@@ -212,7 +212,7 @@ impl<'b, H: OrdSlice> OrdSeqSearcher<'b, H> {
                 let is_match = searcher.is_match_bw;
                 searcher.is_match_bw = !searcher.is_match_bw;
                 let end = searcher.end;
-                match H::next_valid_pos_back(&mut self.iter, end) {
+                match H::next_valid_pos_back(&self.iter.haystack, end) {
                     _ if is_match => SearchStep::Match(end, end),
                     None => SearchStep::Done,
                     Some(next_end) => {
