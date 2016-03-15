@@ -9,6 +9,7 @@ use std::usize;
 
 pub trait OrdSlice: SearchCursors {
     type NeedleElement: Ord;
+    type FastSkipOptimization: FastSkipOptimization<Self::NeedleElement>;
 
     fn next_valid_pos(hs: &Self::Haystack, pos: usize) -> Option<usize>;
     fn next_valid_pos_back(hs: &Self::Haystack, pos: usize) -> Option<usize>;
@@ -116,13 +117,13 @@ pub struct OrdSeqSearcher<'b, H: OrdSlice>
     iter: Iter<H>,
     needle: &'b [H::NeedleElement],
 
-    searcher: OrdSeqSearcherImpl<H::NeedleElement>,
+    searcher: OrdSeqSearcherImpl<H::NeedleElement, H::FastSkipOptimization>,
 }
 
 #[derive(Clone, Debug)]
-enum OrdSeqSearcherImpl<T: Ord> {
+enum OrdSeqSearcherImpl<T, O> {
     Empty(EmptyN),
-    TwoWay(TwoWaySearcher<T>),
+    TwoWay(TwoWaySearcher<T, O>),
 }
 
 #[derive(Clone, Debug)]
@@ -354,20 +355,48 @@ unsafe impl<'b, H: OrdSlice> ReverseSearcher<H> for OrdSeqSearcher<'b, H>
 
 }
 
+pub trait FastSkipOptimization<T> {
+    fn new(needle: &[T]) -> Self;
+    fn contains(&self, byte: &T) -> bool;
+}
+
+/// `ByteOptimization` is a 64-bit "fingerprint" where each set bit `j` corresponds
+/// to a (byte & 63) == j present in the needle.
+pub struct ByteOptimization(u64);
+impl FastSkipOptimization<u8> for ByteOptimization {
+    fn new(needle: &[u8]) -> Self {
+        ByteOptimization(needle.iter().fold(0, |a, &b| (1 << (b & 0x3f)) | a))
+    }
+
+    fn contains(&self, &byte: &u8) -> bool {
+        (self.0 >> ((byte & 0x3f) as usize)) & 1 != 0
+    }
+}
+
+pub struct NoOptimization;
+impl<T> FastSkipOptimization<T> for NoOptimization {
+    fn new(_: &[T]) -> Self {
+        NoOptimization
+    }
+
+    fn contains(&self, _: &T) -> bool {
+        true
+    }
+}
+
 /// The internal state of the two-way substring search algorithm.
 #[derive(Clone, Debug)]
-struct TwoWaySearcher<T> {
+struct TwoWaySearcher<T, O> {
     // constants
     /// critical factorization index
     crit_pos: usize,
     /// critical factorization index for reversed needle
     crit_pos_back: usize,
     period: usize,
-    // TODO #1: Re-add with specialization for [u8] and str cases
-    // /// `byteset` is an extension (not part of the two way algorithm);
-    // /// it's a 64-bit "fingerprint" where each set bit `j` corresponds
-    // /// to a (byte & 63) == j present in the needle.
-    // byteset: u64,
+
+    /// `fast_skip_state` is an extension (not part of the two way algorithm);
+    /// it can be used to skip over multiple rejected elements at once
+    fast_skip_state: O,
 
     // variables
     position: usize,
@@ -377,7 +406,7 @@ struct TwoWaySearcher<T> {
     /// index into needle after which we have already matched
     memory_back: usize,
 
-    _marker: ::std::marker::PhantomData<T>,
+    _marker: ::std::marker::PhantomData<(T, O)>,
 }
 
 /*
@@ -453,10 +482,12 @@ struct TwoWaySearcher<T> {
     for reverse search, chosen instead so that |v'| < period(x).
 
 */
-impl<T: Ord> TwoWaySearcher<T> {
-    fn new(needle: &[T], end: usize) -> TwoWaySearcher<T> {
-        let (crit_pos_false, period_false) = TwoWaySearcher::maximal_suffix(needle, false);
-        let (crit_pos_true, period_true) = TwoWaySearcher::maximal_suffix(needle, true);
+impl<T: Ord, O: FastSkipOptimization<T>> TwoWaySearcher<T, O> {
+    fn new(needle: &[T], end: usize) -> TwoWaySearcher<T, O> {
+        let (crit_pos_false, period_false)
+            = TwoWaySearcher::<T, O>::maximal_suffix(needle, false);
+        let (crit_pos_true, period_true)
+            = TwoWaySearcher::<T, O>::maximal_suffix(needle, true);
 
         let (crit_pos, period) =
             if crit_pos_false > crit_pos_true {
@@ -485,15 +516,15 @@ impl<T: Ord> TwoWaySearcher<T> {
             // period in reverse (crit_pos = 2, period = 2). We use the given
             // reverse factorization but keep the exact period.
             let crit_pos_back = needle.len() - cmp::max(
-                TwoWaySearcher::reverse_maximal_suffix(needle, period, false),
-                TwoWaySearcher::reverse_maximal_suffix(needle, period, true));
+                TwoWaySearcher::<T, O>::reverse_maximal_suffix(needle, period, false),
+                TwoWaySearcher::<T, O>::reverse_maximal_suffix(needle, period, true));
 
             TwoWaySearcher {
                 crit_pos: crit_pos,
                 crit_pos_back: crit_pos_back,
                 period: period,
-                // TODO #1: Re-add with specialization for [u8] and str cases
-                // byteset: Self::byteset_create(&needle[..period]),
+
+                fast_skip_state: O::new(&needle[..period]),
 
                 position: 0,
                 end: end,
@@ -514,8 +545,8 @@ impl<T: Ord> TwoWaySearcher<T> {
                 crit_pos: crit_pos,
                 crit_pos_back: crit_pos,
                 period: cmp::max(crit_pos, needle.len() - crit_pos) + 1,
-                // TODO #1: Re-add with specialization for [u8] and str cases
-                // byteset: Self::byteset_create(needle),
+
+                fast_skip_state: O::new(needle),
 
                 position: 0,
                 end: end,
@@ -526,19 +557,6 @@ impl<T: Ord> TwoWaySearcher<T> {
             }
         }
     }
-
-    // TODO #1: Re-add with specialization for [u8] and str cases
-    /*
-    #[inline]
-    fn byteset_create(bytes: &[u8]) -> u64 {
-        bytes.iter().fold(0, |a, &b| (1 << (b & 0x3f)) | a)
-    }
-
-    #[inline(always)]
-    fn byteset_contains(&self, byte: u8) -> bool {
-        (self.byteset >> ((byte & 0x3f) as usize)) & 1 != 0
-    }
-    */
 
     // One of the main ideas of Two-Way is that we factorize the needle into
     // two halves, (u, v), and begin trying to find v in the haystack by scanning
@@ -557,7 +575,7 @@ impl<T: Ord> TwoWaySearcher<T> {
             // Check that we have room to search in
             // position + needle_last can not overflow if we assume slices
             // are bounded by isize's range.
-            let _tail_byte = match haystack.get(self.position + needle_last) {
+            let tail_byte = match haystack.get(self.position + needle_last) {
                 Some(b) => b,
                 None => {
                     self.position = haystack.len();
@@ -569,17 +587,14 @@ impl<T: Ord> TwoWaySearcher<T> {
                 return S::rejecting(old_pos, self.position);
             }
 
-            // TODO #1: Re-add with specialization for [u8] and str cases
-            /*
             // Quickly skip by large portions unrelated to our substring
-            if !self.byteset_contains(tail_byte) {
+            if !self.fast_skip_state.contains(tail_byte) {
                 self.position += needle.len();
                 if !long_period {
                     self.memory = 0;
                 }
                 continue 'search;
             }
-            */
 
             // See if the right part of the needle matches
             let start = if long_period { self.crit_pos }
@@ -644,7 +659,7 @@ impl<T: Ord> TwoWaySearcher<T> {
             // end - needle.len() will wrap around when there is no more room,
             // but due to slice length limits it can never wrap all the way back
             // into the length of haystack.
-            let _front_byte = match haystack.get(self.end.wrapping_sub(needle.len())) {
+            let front_byte = match haystack.get(self.end.wrapping_sub(needle.len())) {
                 Some(b) => b,
                 None => {
                     self.end = 0;
@@ -656,17 +671,14 @@ impl<T: Ord> TwoWaySearcher<T> {
                 return S::rejecting(self.end, old_end);
             }
 
-            // TODO #1: Re-add with specialization for [u8] and str cases
-            /*
             // Quickly skip by large portions unrelated to our substring
-            if !self.byteset_contains(front_byte) {
+            if !self.fast_skip_state.contains(front_byte) {
                 self.end -= needle.len();
                 if !long_period {
                     self.memory_back = needle.len();
                 }
                 continue 'search;
             }
-            */
 
             // See if the left part of the needle matches
             let crit = if long_period { self.crit_pos_back }

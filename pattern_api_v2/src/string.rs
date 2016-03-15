@@ -544,11 +544,13 @@ impl_both_mutability!(mutable, &'a mut str, *mut u8, u8, |start, end| {
 /////////////////////////////////////////////////////////////////////////////
 
 use fast_sequence_search::{OrdSlice, OrdSlicePattern, OrdSeqSearcher};
+use fast_sequence_search::ByteOptimization;
 
 pub struct StrSearcher<'a, 'b>(OrdSeqSearcher<'b, &'a str>);
 
 impl<'a> OrdSlice for &'a str {
     type NeedleElement = u8;
+    type FastSkipOptimization = ByteOptimization;
 
     fn next_valid_pos(hs: &Self::Haystack, pos: usize) -> Option<usize> {
         let s = unsafe {
