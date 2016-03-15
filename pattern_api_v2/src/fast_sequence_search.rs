@@ -77,6 +77,11 @@ impl<'b, H: OrdSlice> OrdSlicePattern<'b, H> {
         let hs = haystack.into_haystack();
         H::ends_with(&hs, &self.0)
     }
+
+    #[inline]
+    pub fn is_contained_in(self, haystack: H) -> bool {
+        self.into_searcher(haystack).next_match().is_some()
+    }
 }
 
 #[derive(Copy, Clone)]

@@ -589,52 +589,16 @@ impl<'a> OrdSlice for &'a str {
 /// Will handle the pattern `""` as returning empty matches at each character
 /// boundary.
 impl<'a, 'b> Pattern<&'a str> for &'b str {
-    type Searcher = StrSearcher<'a, 'b>;
-
-    #[inline]
-    fn into_searcher(self, haystack: &'a str) -> StrSearcher<'a, 'b> {
-        StrSearcher(OrdSlicePattern(self.as_bytes())
-            .into_searcher(haystack))
-    }
-
-    /// Checks whether the pattern matches at the front of the haystack
-    #[inline]
-    fn is_prefix_of(self, haystack: &'a str) -> bool {
-        OrdSlicePattern(self.as_bytes()).is_prefix_of(haystack)
-    }
-
-    /// Checks whether the pattern matches at the back of the haystack
-    #[inline]
-    fn is_suffix_of(self, haystack: &'a str) -> bool {
-        OrdSlicePattern(self.as_bytes()).is_suffix_of(haystack)
-    }
+    pattern_methods!(StrSearcher<'a, 'b>,
+                     |s: &'b str| OrdSlicePattern(s.as_bytes()),
+                     StrSearcher,
+                     &'a str);
 }
 
 unsafe impl<'a, 'b> Searcher<&'a str> for StrSearcher<'a, 'b> {
-    fn haystack(&self) -> (*const u8, *const u8) {
-        self.0.haystack()
-    }
-
-    #[inline(always)]
-    fn next_match(&mut self) -> Option<(*const u8, *const u8)> {
-        self.0.next_match()
-    }
-
-    #[inline(always)]
-    fn next_reject(&mut self) -> Option<(*const u8, *const u8)> {
-        self.0.next_reject()
-    }
+    searcher_methods!(forward, *const u8);
 }
 
 unsafe impl<'a, 'b> ReverseSearcher<&'a str> for StrSearcher<'a, 'b> {
-    #[inline]
-    fn next_match_back(&mut self) -> Option<(*const u8, *const u8)> {
-        self.0.next_match_back()
-    }
-
-    #[inline(always)]
-    fn next_reject_back(&mut self) -> Option<(*const u8, *const u8)> {
-        self.0.next_reject_back()
-    }
-
+    searcher_methods!(reverse, *const u8);
 }
