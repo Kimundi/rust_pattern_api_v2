@@ -96,6 +96,10 @@ mod utf8 {
 
         Some(unsafe { ::std::mem::transmute(ch) })
     }
+
+    pub fn byte_is_char_boundary(b: u8) -> bool {
+        b < 128 || b >= 192
+    }
 }
 
 macro_rules! pattern_methods {
@@ -348,10 +352,14 @@ macro_rules! impl_both_mutability {
                     if self.ascii_only {
                         while let Some(b) = self.iter.next() {
                             if !self.char_eq.matches(b as char) {
-                                return Some(unsafe {
-                                    (self.iter.start.offset(-1),
-                                     self.iter.start)
-                                })
+                                unsafe {
+                                    let reject_start = self.iter.start.offset(-1);
+                                    while !utf8::byte_is_char_boundary(
+                                            *self.iter.start) {
+                                        self.iter.start = self.iter.start.offset(1);
+                                    }
+                                    return Some((reject_start, self.iter.start))
+                                }
                             }
                         }
                     } else {
@@ -398,10 +406,14 @@ macro_rules! impl_both_mutability {
                     if self.ascii_only {
                         while let Some(b) = self.iter.next_back() {
                             if !self.char_eq.matches(b as char) {
-                                return Some(unsafe {
-                                    (self.iter.end,
-                                     self.iter.end.offset(1))
-                                })
+                                unsafe {
+                                    let reject_end = self.iter.end.offset(1);
+                                    while !utf8::byte_is_char_boundary(
+                                            *self.iter.end) {
+                                        self.iter.end = self.iter.end.offset(-1);
+                                    }
+                                    return Some((self.iter.end, reject_end))
+                                }
                             }
                         }
                     } else {

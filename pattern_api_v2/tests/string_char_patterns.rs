@@ -68,11 +68,11 @@ searcher_test!(char_searcher_ascii_haystack, 'b', "abbcbbd", double, is exact [
     Match (5, 6),
     Reject(6, 7),
 ]);
-searcher_test!(char_searcher_mulibyte_haystack, ' ', "├──", double, is valid /* [
+searcher_test!(char_searcher_mulibyte_haystack, ' ', "├──", double, is exact [
     Reject(0, 3),
     Reject(3, 6),
     Reject(6, 9),
-]*/);
+]);
 searcher_test!(char_searcher_short_haystack, '\u{1F4A9}', "* \t", double, is exact [
     Reject(0, 1),
     Reject(1, 2),
