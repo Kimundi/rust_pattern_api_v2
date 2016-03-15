@@ -7,12 +7,8 @@ use super::*;
 use std::cmp;
 use std::usize;
 
-trait OrdSlice: SearchCursors {
+pub trait OrdSlice: SearchCursors {
     type NeedleElement: Ord;
-
-    // TODO: default implement
-    fn starts_with(hs: &Self::Haystack, needle: &[Self::NeedleElement]) -> bool;
-    fn ends_with(hs: &Self::Haystack, needle: &[Self::NeedleElement]) -> bool;
 
     fn next_valid_pos(hs_iter: &mut Iter<Self>, pos: usize) -> Option<usize>;
     fn next_valid_pos_back(hs_iter: &mut Iter<Self>, pos: usize) -> Option<usize>;
@@ -22,6 +18,17 @@ trait OrdSlice: SearchCursors {
     fn pos_is_valid(hs: &Self::Haystack, pos: usize) -> bool;
 
     unsafe fn cursor_at_offset(hs: Self::Haystack, offset: usize) -> Self::Cursor;
+
+    fn starts_with(hs: &Self::Haystack, needle: &[Self::NeedleElement]) -> bool {
+        let haystack = Self::haystack_as_slice(hs);
+        haystack.len() >= needle.len()
+            && haystack[..needle.len()] == *needle
+    }
+    fn ends_with(hs: &Self::Haystack, needle: &[Self::NeedleElement]) -> bool {
+        let haystack = Self::haystack_as_slice(hs);
+        haystack.len() >= needle.len()
+            && haystack[haystack.len() - needle.len()..] == *needle
+    }
 }
 
 // Only temporary used to make the old code work without major changes
@@ -43,7 +50,7 @@ enum SearchStep {
 // Pattern<&'a [T]> for &'b [T]
 // Pattern<&'a mut [T]> for &'b [T]
 
-struct OrdSlicePattern<'b, H: OrdSlice>(&'b [H::NeedleElement])
+pub struct OrdSlicePattern<'b, H: OrdSlice>(&'b [H::NeedleElement])
     where H::NeedleElement: 'b;
 
 /// Non-allocating substring search.
@@ -72,7 +79,7 @@ impl<'b, H: OrdSlice> OrdSlicePattern<'b, H> {
 }
 
 #[derive(Copy, Clone)]
-struct Iter<H: SearchCursors> {
+pub struct Iter<H: SearchCursors> {
     haystack: H::Haystack,
     start: H::Cursor,
     end: H::Cursor,
