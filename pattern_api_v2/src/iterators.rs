@@ -1,4 +1,5 @@
 use super::*;
+use slice::Elem;
 
 pub fn match_indices<H, P>(haystack: H, pattern: P) -> Vec<(usize, H)>
     where H: SearchCursors,
@@ -28,7 +29,7 @@ fn test_match_indices() {
     let mut slice = &mut {*b"banana"}[..];
 
     {
-        let match_indices = match_indices(&mut*slice, slice::Ascii(b'a'));
+        let match_indices = match_indices(&mut*slice, Elem(b'a'));
 
         assert_eq!(match_indices.iter().map(|x| x.0).collect::<Vec<_>>(),
                     vec![1, 3, 5]);
@@ -81,7 +82,7 @@ fn test_split() {
     let mut slice = &mut {*b"hangman"}[..];
 
     {
-        let split = split(&mut*slice, slice::Ascii(b'a'));
+        let split = split(&mut*slice, Elem(b'a'));
 
         for m in split {
             for byte in m {

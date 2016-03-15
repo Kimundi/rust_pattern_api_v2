@@ -100,61 +100,6 @@ mod utf8 {
     }
 }
 
-macro_rules! pattern_methods {
-    ($t:ty, $pmap:expr, $smap:expr, $slice:ty) => {
-        type Searcher = $t;
-
-        #[inline]
-        fn into_searcher(self, haystack: $slice) -> $t {
-            ($smap)(($pmap)(self).into_searcher(haystack))
-        }
-
-        #[inline]
-        fn is_contained_in(self, haystack: $slice) -> bool {
-            ($pmap)(self).is_contained_in(haystack)
-        }
-
-        #[inline]
-        fn is_prefix_of(self, haystack: $slice) -> bool {
-            ($pmap)(self).is_prefix_of(haystack)
-        }
-
-        #[inline]
-        fn is_suffix_of(self, haystack: $slice) -> bool
-            where $t: ReverseSearcher<$slice>
-        {
-            ($pmap)(self).is_suffix_of(haystack)
-        }
-    }
-}
-
-macro_rules! searcher_methods {
-    (forward, $cursor:ty) => {
-        #[inline]
-        fn haystack(&self) -> ($cursor, $cursor) {
-            self.0.haystack()
-        }
-        #[inline]
-        fn next_match(&mut self) -> Option<($cursor, $cursor)> {
-            self.0.next_match()
-        }
-        #[inline]
-        fn next_reject(&mut self) -> Option<($cursor, $cursor)> {
-            self.0.next_reject()
-        }
-    };
-    (reverse, $cursor:ty) => {
-        #[inline]
-        fn next_match_back(&mut self) -> Option<($cursor, $cursor)> {
-            self.0.next_match_back()
-        }
-        #[inline]
-        fn next_reject_back(&mut self) -> Option<($cursor, $cursor)> {
-            self.0.next_reject_back()
-        }
-    }
-}
-
 trait CharEq {
     fn matches(&mut self, char) -> bool;
     fn only_ascii(&self) -> bool;
@@ -439,11 +384,11 @@ macro_rules! impl_both_mutability {
             pub struct CharSearcher<'a>(CharEqSearcher<'a, char>);
 
             unsafe impl<'a> Searcher<$slice> for CharSearcher<'a> {
-                searcher_methods!(forward, $cursor);
+                searcher_methods!(forward, s, s.0, $cursor);
             }
 
             unsafe impl<'a> ReverseSearcher<$slice> for CharSearcher<'a> {
-                searcher_methods!(reverse, $cursor);
+                searcher_methods!(reverse, s, s.0, $cursor);
             }
 
             impl<'a> DoubleEndedSearcher<$slice> for CharSearcher<'a> {}
@@ -464,11 +409,11 @@ macro_rules! impl_both_mutability {
             pub struct CharSliceSearcher<'a, 'b>(CharEqSearcher<'a, &'b [char]>);
 
             unsafe impl<'a, 'b> Searcher<$slice> for CharSliceSearcher<'a, 'b> {
-                searcher_methods!(forward, $cursor);
+                searcher_methods!(forward, s, s.0, $cursor);
             }
 
             unsafe impl<'a, 'b> ReverseSearcher<$slice> for CharSliceSearcher<'a, 'b> {
-                searcher_methods!(reverse, $cursor);
+                searcher_methods!(reverse, s, s.0, $cursor);
             }
 
             impl<'a, 'b> DoubleEndedSearcher<$slice> for CharSliceSearcher<'a, 'b> {}
@@ -490,13 +435,13 @@ macro_rules! impl_both_mutability {
             unsafe impl<'a, F> Searcher<$slice> for CharPredicateSearcher<'a, F>
                 where F: FnMut(char) -> bool
             {
-                searcher_methods!(forward, $cursor);
+                searcher_methods!(forward, s, s.0, $cursor);
             }
 
             unsafe impl<'a, F> ReverseSearcher<$slice> for CharPredicateSearcher<'a, F>
                 where F: FnMut(char) -> bool
             {
-                searcher_methods!(reverse, $cursor);
+                searcher_methods!(reverse, s, s.0, $cursor);
             }
 
             impl<'a, F> DoubleEndedSearcher<$slice> for CharPredicateSearcher<'a, F>
@@ -564,11 +509,11 @@ macro_rules! impl_both_mutability {
             }
 
             unsafe impl<'a, 'b> Searcher<$slice> for StrSearcher<'a, 'b> {
-                searcher_methods!(forward, $cursor);
+                searcher_methods!(forward, s, s.0, $cursor);
             }
 
             unsafe impl<'a, 'b> ReverseSearcher<$slice> for StrSearcher<'a, 'b> {
-                searcher_methods!(reverse, $cursor);
+                searcher_methods!(reverse, s, s.0, $cursor);
             }
 
         }

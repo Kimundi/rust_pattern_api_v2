@@ -1,6 +1,11 @@
 #![feature(str_char)]
 
+#[macro_use]
+mod macros;
+
+// TODO
 // Name: Maybe SequencePattern ?
+// Replace Iter structs with lib std slice iterators (need ptr access)
 
 pub mod fast_sequence_search;
 
