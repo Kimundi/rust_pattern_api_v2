@@ -33,6 +33,7 @@ macro_rules! searcher_test {
         mod $name {
             use $crate::SearchResult::{Match, Reject};
             use $crate::{cmp_search_to_vec};
+            use super::*;
 
             #[test]
             fn fwd_exact() {
