@@ -1,5 +1,3 @@
-use super::*;
-
 // TODO: This is mostly stolen from std::str
 mod utf8 {
     /// Mask of the value bits of a continuation byte
@@ -509,6 +507,70 @@ macro_rules! impl_both_mutability {
                 pattern_methods!(CharPredicateSearcher<'a, F>, CharEqPattern, CharPredicateSearcher, $slice);
             }
 
+            ////////////////////////////////////////////////////////////////////
+            // Impl for &str
+            ////////////////////////////////////////////////////////////////////
+
+            use fast_sequence_search::{OrdSlice, OrdSlicePattern, OrdSeqSearcher};
+            use fast_sequence_search::ByteOptimization;
+
+            pub struct StrSearcher<'a, 'b>(OrdSeqSearcher<'b, $slice>);
+
+            impl<'a> OrdSlice for $slice {
+                type NeedleElement = u8;
+                type FastSkipOptimization = ByteOptimization;
+
+                fn next_valid_pos(hs: &Self::Haystack, pos: usize) -> Option<usize> {
+                    let s = unsafe {
+                        ::std::str::from_utf8_unchecked(Self::haystack_as_slice(hs))
+                    };
+                    s[pos..].chars().next().map(|c| pos + c.len_utf8())
+                }
+
+                fn next_valid_pos_back(hs: &Self::Haystack, pos: usize) -> Option<usize> {
+                    let s = unsafe {
+                        ::std::str::from_utf8_unchecked(Self::haystack_as_slice(hs))
+                    };
+                    s[..pos].chars().next_back().map(|c| pos - c.len_utf8())
+                }
+
+                fn haystack_as_slice<'t>(hs: &'t Self::Haystack) -> &'t [Self::NeedleElement] {
+                    unsafe {
+                        ::std::slice::from_raw_parts(hs.0, hs.1 as usize - hs.0 as usize)
+                    }
+                }
+
+                fn pos_is_valid(hs: &Self::Haystack, pos: usize) -> bool {
+                    let s = unsafe {
+                        ::std::str::from_utf8_unchecked(Self::haystack_as_slice(hs))
+                    };
+                    s.is_char_boundary(pos)
+                }
+
+                unsafe fn cursor_at_offset(hs: Self::Haystack, offset: usize) -> Self::Cursor {
+                    hs.0.offset(offset as isize)
+                }
+            }
+
+            /// Non-allocating substring search.
+            ///
+            /// Will handle the pattern `""` as returning empty matches at each character
+            /// boundary.
+            impl<'a, 'b> Pattern<$slice> for &'b str {
+                pattern_methods!(StrSearcher<'a, 'b>,
+                                |s: &'b str| OrdSlicePattern(s.as_bytes()),
+                                StrSearcher,
+                                $slice);
+            }
+
+            unsafe impl<'a, 'b> Searcher<$slice> for StrSearcher<'a, 'b> {
+                searcher_methods!(forward, $cursor);
+            }
+
+            unsafe impl<'a, 'b> ReverseSearcher<$slice> for StrSearcher<'a, 'b> {
+                searcher_methods!(reverse, $cursor);
+            }
+
         }
     }
 }
@@ -538,67 +600,3 @@ impl_both_mutability!(mutable, &'a mut str, *mut u8, u8, |start, end| {
     };
     (begin, end)
 });
-
-/////////////////////////////////////////////////////////////////////////////
-// Impl for &str
-/////////////////////////////////////////////////////////////////////////////
-
-use fast_sequence_search::{OrdSlice, OrdSlicePattern, OrdSeqSearcher};
-use fast_sequence_search::ByteOptimization;
-
-pub struct StrSearcher<'a, 'b>(OrdSeqSearcher<'b, &'a str>);
-
-impl<'a> OrdSlice for &'a str {
-    type NeedleElement = u8;
-    type FastSkipOptimization = ByteOptimization;
-
-    fn next_valid_pos(hs: &Self::Haystack, pos: usize) -> Option<usize> {
-        let s = unsafe {
-            ::std::str::from_utf8_unchecked(Self::haystack_as_slice(hs))
-        };
-        s[pos..].chars().next().map(|c| pos + c.len_utf8())
-    }
-
-    fn next_valid_pos_back(hs: &Self::Haystack, pos: usize) -> Option<usize> {
-        let s = unsafe {
-            ::std::str::from_utf8_unchecked(Self::haystack_as_slice(hs))
-        };
-        s[..pos].chars().next_back().map(|c| pos - c.len_utf8())
-    }
-
-    fn haystack_as_slice<'t>(hs: &'t Self::Haystack) -> &'t [Self::NeedleElement] {
-        unsafe {
-            ::std::slice::from_raw_parts(hs.0, hs.1 as usize - hs.0 as usize)
-        }
-    }
-
-    fn pos_is_valid(hs: &Self::Haystack, pos: usize) -> bool {
-        let s = unsafe {
-            ::std::str::from_utf8_unchecked(Self::haystack_as_slice(hs))
-        };
-        s.is_char_boundary(pos)
-    }
-
-    unsafe fn cursor_at_offset(hs: Self::Haystack, offset: usize) -> Self::Cursor {
-        hs.0.offset(offset as isize)
-    }
-}
-
-/// Non-allocating substring search.
-///
-/// Will handle the pattern `""` as returning empty matches at each character
-/// boundary.
-impl<'a, 'b> Pattern<&'a str> for &'b str {
-    pattern_methods!(StrSearcher<'a, 'b>,
-                     |s: &'b str| OrdSlicePattern(s.as_bytes()),
-                     StrSearcher,
-                     &'a str);
-}
-
-unsafe impl<'a, 'b> Searcher<&'a str> for StrSearcher<'a, 'b> {
-    searcher_methods!(forward, *const u8);
-}
-
-unsafe impl<'a, 'b> ReverseSearcher<&'a str> for StrSearcher<'a, 'b> {
-    searcher_methods!(reverse, *const u8);
-}
