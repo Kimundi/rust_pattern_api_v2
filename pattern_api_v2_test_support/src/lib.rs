@@ -28,7 +28,7 @@ use SearchResult::{Match, Reject};
 #[macro_export]
 macro_rules! searcher_test {
     // For testing if the results of a double ended searcher exactly match what is expected
-    ($name:ident, $p:expr, $h:expr, double, is exact [$($e:expr,)*]) => {
+    ($name:ident, $p:expr, $h:expr, double: [$($e:expr,)*]) => {
         #[allow(unused_imports)]
         mod $name {
             use $crate::SearchResult::{Match, Reject};
@@ -45,23 +45,8 @@ macro_rules! searcher_test {
             }
         }
     };
-    // For testing if the results of a double ended searcher are merely valid
-    ($name:ident, $p:expr, $h:expr, double, is valid) => {
-        #[allow(unused_imports)]
-        mod $name {
-            use $crate::SearchResult::{Match, Reject};
-            use $crate::{cmp_search_to_vec, compare};
-
-            #[test]
-            fn fwd_and_bwd_valid() {
-                let left = &cmp_search_to_vec(false, || $p, || $h, None);
-                let right = &cmp_search_to_vec(true, || $p, || $h, None);
-                compare(left, right, $h);
-            }
-        }
-    };
     // For testing if the results of a forward-reverse searcher exactly match what is expected
-    ($name:ident, $p:expr, $h:expr, reverse, is exact [$($e:expr,)*], [$($f:expr,)*]) => {
+    ($name:ident, $p:expr, $h:expr, forward: [$($e:expr,)*], backward: [$($f:expr,)*]) => {
         #[allow(unused_imports)]
         mod $name {
             use $crate::SearchResult::{Match, Reject};
@@ -77,20 +62,6 @@ macro_rules! searcher_test {
             }
         }
     };
-    // For testing if the results of a forward-reverse searcher are merely valid
-    ($name:ident, $p:expr, $h:expr, reverse, is valid) => {
-        #[allow(unused_imports)]
-        mod $name {
-            use $crate::SearchResult::{Match, Reject};
-            use $crate::{cmp_search_to_vec};
-
-            #[test]
-            fn fwd_and_bwd_valid() {
-                let left = &cmp_search_to_vec(false, || $p, || $h, None);
-                let right = &cmp_search_to_vec(true, || $p, || $h, None);
-            }
-        }
-    };
 }
 
 pub fn cmp_search_to_vec<'a, H, P, F, HF>(rev: bool,
@@ -103,106 +74,18 @@ where H: SearchCursors,
       F: FnMut() -> P,
       HF: FnMut() -> H,
 {
-    let mut matches = {
-        let mut searcher = pat().into_searcher(haystack());
-        let mut v = vec![];
-        loop {
-            match if !rev {searcher.next_match()} else {searcher.next_match_back()} {
-                Some((a, b)) => v.push((a, b)),
-                None => break,
-            }
-        }
-        if rev {
-            v.reverse();
-        }
-        v.into_iter().map(|(a, b)| {
-            let haystack = searcher.haystack();
-            (
-                H::offset_from_front(haystack, a),
-                H::offset_from_front(haystack, b),
-            )
-        }).collect::<Vec<_>>().into_iter()
-    };
 
-    let mut rejects = {
-        let mut searcher = pat().into_searcher(haystack());
-        let mut v = vec![];
-        loop {
-            match if !rev {searcher.next_reject()} else {searcher.next_reject_back()} {
-                Some((a, b)) => v.push((a, b)),
-                None => break,
-            }
-        }
-        if rev {
-            v.reverse();
-        }
-        v.into_iter().map(|(a, b)| {
-            let haystack = searcher.haystack();
-            (
-                H::offset_from_front(haystack, a),
-                H::offset_from_front(haystack, b),
-            )
-        }).collect::<Vec<_>>().into_iter()
-    };
-
-    let mut v = vec![];
-
-    // Merge the two streams of results
-    {
-        let mut cur_match = matches.next();
-        let mut cur_reject = rejects.next();
-
-        loop {
-            if cur_match.is_none() && cur_reject.is_none() {
-                break;
-            } else if cur_match.is_some() && cur_reject.is_some() {
-                let m = cur_match.unwrap();
-                let r = cur_reject.unwrap();
-
-                if m.0 <= r.0 {
-                    v.push(Match(m.0, m.1));
-                    cur_match = matches.next();
-                } else {
-                    v.push(Reject(r.0, r.1));
-                    cur_reject = rejects.next();
-                }
-            } else if cur_match.is_some() {
-                let m = cur_match.unwrap();
-                v.push(Match(m.0, m.1));
-                cur_match = matches.next();
-            } else if cur_reject.is_some() {
-                let r = cur_reject.unwrap();
-                v.push(Reject(r.0, r.1));
-                cur_reject = rejects.next();
-            }
-        }
-    }
-
-    println!("");
-
-    // Validate and emit diagnostics
-
-    let hs_len = {
-        let hs = haystack().into_haystack();
-        H::haystack_len(hs)
-    };
-
-    if is_malformed(&v, hs_len) {
-        panic!("searcher impl outputted invalid search results");
-    }
-
-    if let Some(right) = right {
-        compare(&v, &right, hs_len);
-    }
-
-    v
+    cmp_search_to_vec2(rev, |f: &mut Callback| {
+        let h = haystack();
+        let p = pat();
+        f.call(h, p);
+    }, right)
 }
 
 #[macro_export]
 macro_rules! searcher_cross_test {
     ($tname:ident {
-        is double;
-        is exact [$($res:expr,)*];
+        double: [$($res:expr,)*];
         for:
         $($cname:ident, $hty:ty: $h:expr, $pty:ty: $p:expr;)*
     }) => {

@@ -5,14 +5,14 @@ extern crate pattern_api_v2;
 pub use pattern_api_v2::slice::Elem;
 
 // &[u8] tests
-searcher_test!(slice_searcher_haystack, &b"bb"[..], &b"abbcbbd"[..], double, is exact [
+searcher_test!(slice_searcher_haystack, &b"bb"[..], &b"abbcbbd"[..], double: [
     Reject(0, 1),
     Match (1, 3),
     Reject(3, 4),
     Match (4, 6),
     Reject(6, 7),
 ]);
-searcher_test!(slice_searcher_haystack_seq, &b"bb"[..], &b"abbcbbbbd"[..], double, is exact [
+searcher_test!(slice_searcher_haystack_seq, &b"bb"[..], &b"abbcbbbbd"[..], double: [
     Reject(0, 1),
     Match (1, 3),
     Reject(3, 4),
@@ -20,14 +20,14 @@ searcher_test!(slice_searcher_haystack_seq, &b"bb"[..], &b"abbcbbbbd"[..], doubl
     Match (6, 8),
     Reject(8, 9),
 ]);
-searcher_test!(slice_searcher_haystack_ambiguity, &b"aa"[..], &b"aaa"[..], reverse, is exact [
+searcher_test!(slice_searcher_haystack_ambiguity, &b"aa"[..], &b"aaa"[..], forward: [
     Match (0, 2),
     Reject(2, 3),
-], [
+], backward: [
     Reject(0, 1),
     Match (1, 3),
 ]);
-searcher_test!(slice_searcher_empty_needle_haystack, &b""[..], &b"abbcbbd"[..], double, is exact [
+searcher_test!(slice_searcher_empty_needle_haystack, &b""[..], &b"abbcbbd"[..], double: [
     Match (0, 0),
     Reject(0, 1),
     Match (1, 1),
@@ -44,10 +44,10 @@ searcher_test!(slice_searcher_empty_needle_haystack, &b""[..], &b"abbcbbd"[..], 
     Reject(6, 7),
     Match (7, 7),
 ]);
-searcher_test!(slice_searcher_empty_needle_empty_haystack, &b""[..], &b""[..], double, is exact [
+searcher_test!(slice_searcher_empty_needle_empty_haystack, &b""[..], &b""[..], double: [
     Match(0, 0),
 ]);
-searcher_test!(elem_searcher_haystack, Elem(b'b'), &b"abbcbbd"[..], double, is exact [
+searcher_test!(elem_searcher_haystack, Elem(b'b'), &b"abbcbbd"[..], double: [
     Reject(0, 1),
     Match (1, 2),
     Match (2, 3),

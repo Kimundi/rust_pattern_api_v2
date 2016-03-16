@@ -4,8 +4,7 @@ extern crate pattern_api_v2;
 
 searcher_cross_test! {
     test1 {
-        is double;
-        is exact [
+        double: [
             Reject(0, 1),
             Match (1, 3),
             Reject(3, 4),
