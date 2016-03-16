@@ -25,45 +25,6 @@ impl SearchResult {
 
 use SearchResult::{Match, Reject};
 
-#[macro_export]
-macro_rules! searcher_test {
-    // For testing if the results of a double ended searcher exactly match what is expected
-    ($name:ident, $p:expr, $h:expr, double: [$($e:expr,)*]) => {
-        #[allow(unused_imports)]
-        mod $name {
-            use $crate::SearchResult::{Match, Reject};
-            use $crate::{cmp_search_to_vec};
-            use super::*;
-
-            #[test]
-            fn fwd_exact() {
-                cmp_search_to_vec(false, || $p, || $h, Some(vec![$($e),*]));
-            }
-            #[test]
-            fn bwd_exact() {
-                cmp_search_to_vec(true, || $p, || $h, Some(vec![$($e),*]));
-            }
-        }
-    };
-    // For testing if the results of a forward-reverse searcher exactly match what is expected
-    ($name:ident, $p:expr, $h:expr, forward: [$($e:expr,)*], backward: [$($f:expr,)*]) => {
-        #[allow(unused_imports)]
-        mod $name {
-            use $crate::SearchResult::{Match, Reject};
-            use $crate::{cmp_search_to_vec};
-
-            #[test]
-            fn fwd_exact() {
-                cmp_search_to_vec(false, || $p, || $h, Some(vec![$($e),*]));
-            }
-            #[test]
-            fn bwd_exact() {
-                cmp_search_to_vec(true, || $p, || $h, Some(vec![$($f),*]));
-            }
-        }
-    };
-}
-
 pub fn cmp_search_to_vec<'a, H, P, F, HF>(rev: bool,
                                           mut pat: F,
                                           mut haystack: HF,
@@ -89,6 +50,21 @@ macro_rules! searcher_cross_test {
         for:
         $($cname:ident, $hty:ty: $h:expr, $pty:ty: $p:expr;)*
     }) => {
+        searcher_cross_test! {
+            $tname {
+                forward: [$($res,)*];
+                backward: [$($res,)*];
+                for:
+                $($cname, $hty: $h, $pty: $p;)*
+            }
+        }
+    };
+    ($tname:ident {
+        forward: [$($res:expr,)*];
+        backward: [$($rres:expr,)*];
+        for:
+        $($cname:ident, $hty:ty: $h:expr, $pty:ty: $p:expr;)*
+    }) => {
         #[allow(unused_imports)]
         mod $tname {
             use $crate::SearchResult::{self, Match, Reject};
@@ -97,14 +73,19 @@ macro_rules! searcher_cross_test {
                 vec![$($res),*]
             }
 
+            fn rbuild() -> Vec<SearchResult> {
+                vec![$($rres),*]
+            }
+
             $(
                 mod $cname {
                     use $crate::SearchResult::{Match, Reject};
                     use $crate::{cmp_search_to_vec2, Callback};
-                    use super::build;
+                    use super::{build, rbuild};
+                    use super::super::*;
 
                     #[test]
-                    fn fwd_exact() {
+                    fn fwd() {
                         cmp_search_to_vec2(false, |f: &mut Callback| {
                             let h: $hty = $h;
                             let p: $pty = $p;
@@ -112,17 +93,42 @@ macro_rules! searcher_cross_test {
                         }, Some(build()));
                     }
                     #[test]
-                    fn bwd_exact() {
+                    fn bwd() {
                         cmp_search_to_vec2(true, |f: &mut Callback| {
                             let h: $hty = $h;
                             let p: $pty = $p;
                             f.call(h, p);
-                        }, Some(build()));
+                        }, Some(rbuild()));
                     }
                 }
             )*
         }
     }
+}
+
+#[macro_export]
+macro_rules! searcher_test {
+    // For testing if the results of a double ended searcher exactly match what is expected
+    ($name:ident, $p:expr, $h:expr, double: [$($e:expr,)*]) => {
+        searcher_cross_test!{
+            $name {
+                double: [$($e,)*];
+                for:
+                test, _: $h, _: $p;
+            }
+        }
+    };
+    // For testing if the results of a forward-reverse searcher exactly match what is expected
+    ($name:ident, $p:expr, $h:expr, forward: [$($e:expr,)*], backward: [$($f:expr,)*]) => {
+        searcher_cross_test!{
+            $name {
+                forward: [$($e,)*];
+                backward: [$($f,)*];
+                for:
+                test, _: $h, _: $p;
+            }
+        }
+    };
 }
 
 enum CallbackMode {
