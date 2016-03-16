@@ -182,18 +182,198 @@ where H: SearchCursors,
 
     // Validate and emit diagnostics
 
-    if is_malformed(&v, haystack()) {
+    let hs_len = {
+        let hs = haystack().into_haystack();
+        H::haystack_len(hs)
+    };
+
+    if is_malformed(&v, hs_len) {
         panic!("searcher impl outputted invalid search results");
     }
 
     if let Some(right) = right {
-        compare(&v, &right, haystack());
+        compare(&v, &right, hs_len);
     }
 
     v
 }
 
-pub fn is_malformed<H: SearchCursors>(v: &[SearchResult], haystack: H) -> bool {
+#[macro_export]
+macro_rules! searcher_cross_test {
+    ($tname:ident {
+        is double;
+        is exact [$($res:expr,)*];
+        for:
+        $($cname:ident, $hty:ty: $h:expr, $pty:ty: $p:expr;)*
+    }) => {
+        #[allow(unused_imports)]
+        mod $tname {
+            use $crate::SearchResult::{self, Match, Reject};
+
+            fn build() -> Vec<SearchResult> {
+                vec![$($res),*]
+            }
+
+            $(
+                mod $cname {
+                    use $crate::SearchResult::{Match, Reject};
+                    use $crate::{cmp_search_to_vec2, Callback};
+                    use super::build;
+
+                    #[test]
+                    fn fwd_exact() {
+                        cmp_search_to_vec2(false, |f: &mut Callback| {
+                            let h: $hty = $h;
+                            let p: $pty = $p;
+                            f.call(h, p);
+                        }, Some(build()));
+                    }
+                    #[test]
+                    fn bwd_exact() {
+                        cmp_search_to_vec2(true, |f: &mut Callback| {
+                            let h: $hty = $h;
+                            let p: $pty = $p;
+                            f.call(h, p);
+                        }, Some(build()));
+                    }
+                }
+            )*
+        }
+    }
+}
+
+enum CallbackMode {
+    Gather {
+        rev: bool,
+        matches: bool,
+    },
+}
+
+pub struct Callback {
+    mode: CallbackMode,
+    result: Vec<(usize, usize)>,
+    hs_len: Option<usize>,
+}
+impl Callback {
+    pub fn call<H, P>(&mut self, haystack: H, pattern: P)
+        where H: SearchCursors,
+              P: Pattern<H>,
+              P::Searcher: ReverseSearcher<H>,
+    {
+        match self.mode {
+            CallbackMode::Gather { rev, matches } => {
+                let r = {
+                    let mut searcher = pattern.into_searcher(haystack);
+                    let mut v = vec![];
+                    loop {
+                        let next = match (rev, matches) {
+                            (false, true) =>  searcher.next_match(),
+                            (false, false) =>  searcher.next_reject(),
+                            (true, true) =>  searcher.next_match_back(),
+                            (true, false) =>  searcher.next_reject_back(),
+                        };
+                        match next {
+                            Some((a, b)) => v.push((a, b)),
+                            None => break,
+                        }
+                    }
+                    if rev {
+                        v.reverse();
+                    }
+                    self.hs_len = Some(H::haystack_len(searcher.haystack()));
+                    v.into_iter().map(|(a, b)| {
+                        let haystack = searcher.haystack();
+                        (
+                            H::offset_from_front(haystack, a),
+                            H::offset_from_front(haystack, b),
+                        )
+                    }).collect::<Vec<_>>()
+                };
+                self.result = r;
+            }
+        }
+
+    }
+
+    fn new(rev: bool, matches: bool) -> Self {
+        Callback {
+            mode: CallbackMode::Gather {
+                rev: rev,
+                matches: matches,
+            },
+            result: vec![],
+            hs_len: None,
+        }
+    }
+}
+
+
+pub fn cmp_search_to_vec2<F>(rev: bool,
+                             mut f: F,
+                             right: Option<Vec<SearchResult>>)
+                             ->  Vec<SearchResult>
+where F: FnMut(&mut Callback),
+{
+    let mut matches = Callback::new(rev, true);
+    f(&mut matches);
+
+    let mut rejects = Callback::new(rev, false);
+    f(&mut rejects);
+
+    let hs_len = matches.hs_len.unwrap();
+
+    let mut matches = matches.result.into_iter();
+    let mut rejects = rejects.result.into_iter();
+
+    let mut v = vec![];
+
+    // Merge the two streams of results
+    {
+        let mut cur_match = matches.next();
+        let mut cur_reject = rejects.next();
+
+        loop {
+            if cur_match.is_none() && cur_reject.is_none() {
+                break;
+            } else if cur_match.is_some() && cur_reject.is_some() {
+                let m = cur_match.unwrap();
+                let r = cur_reject.unwrap();
+
+                if m.0 <= r.0 {
+                    v.push(Match(m.0, m.1));
+                    cur_match = matches.next();
+                } else {
+                    v.push(Reject(r.0, r.1));
+                    cur_reject = rejects.next();
+                }
+            } else if cur_match.is_some() {
+                let m = cur_match.unwrap();
+                v.push(Match(m.0, m.1));
+                cur_match = matches.next();
+            } else if cur_reject.is_some() {
+                let r = cur_reject.unwrap();
+                v.push(Reject(r.0, r.1));
+                cur_reject = rejects.next();
+            }
+        }
+    }
+
+    println!("");
+
+    // Validate and emit diagnostics
+
+    if is_malformed(&v, hs_len) {
+        panic!("searcher impl outputted invalid search results");
+    }
+
+    if let Some(right) = right {
+        compare(&v, &right, hs_len);
+    }
+
+    v
+}
+
+pub fn is_malformed(v: &[SearchResult], haystack_len: usize) -> bool {
     let mut found = false;
     for (i, pair) in v.windows(2).enumerate() {
         if pair[0].end() < pair[1].begin() {
@@ -221,8 +401,7 @@ pub fn is_malformed<H: SearchCursors>(v: &[SearchResult], haystack: H) -> bool {
             found = true;
         }
 
-        let haystack = haystack.into_haystack();
-        if v[v.len() - 1].end() != H::haystack_len(haystack) {
+        if v[v.len() - 1].end() != haystack_len {
             println!("Last interval did not end at end of haystack: [..., {:?}]", &v[v.len() - 1]);
             found = true;
         }
@@ -231,8 +410,8 @@ pub fn is_malformed<H: SearchCursors>(v: &[SearchResult], haystack: H) -> bool {
     found
 }
 
-pub fn compare<H: SearchCursors>(left: &[SearchResult], right: &[SearchResult], haystack: H) {
-    if is_malformed(&right, haystack) {
+pub fn compare(left: &[SearchResult], right: &[SearchResult], haystack_len: usize) {
+    if is_malformed(&right, haystack_len) {
         panic!("should-be search result test input is malformed, check test code for correctness");
     }
 

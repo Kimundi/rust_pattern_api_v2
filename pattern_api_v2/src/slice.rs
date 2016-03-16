@@ -1,3 +1,7 @@
+fn ptr_range_len<T>(a: *const T, b: *const T) -> usize {
+    (b as usize - a as usize) / ::std::mem::size_of::<T>()
+}
+
 #[derive(Copy, Clone)]
 pub struct Elem<T>(pub T);
 
@@ -26,6 +30,7 @@ macro_rules! impl_both_mutability {
                     $haystack_to_cursors:expr) => {
         pub mod $module {
             use core_traits::*;
+            use super::ptr_range_len;
 
             #[derive(Copy, Clone)]
             struct Iter<'a, T: 'a> {
@@ -82,7 +87,7 @@ macro_rules! impl_both_mutability {
 
                 fn offset_from_front(haystack: Self::Haystack,
                                      begin: Self::Cursor) -> usize {
-                    begin as usize - haystack.0 as usize
+                    ptr_range_len(haystack.0, begin)
                 }
 
                 unsafe fn range_to_self(_: Self::Haystack,
@@ -321,7 +326,7 @@ macro_rules! impl_both_mutability {
 impl_both_mutability!(shared, &'a [T], *const T, &'a T, |ptr: *const T| {
     &*ptr
 }, |start, end| {
-    ::std::slice::from_raw_parts(start, end as usize - start as usize)
+    ::std::slice::from_raw_parts(start, ptr_range_len(start, end))
 }, |haystack: &'a [T]| {
     let begin = haystack.as_ptr();
     let end = unsafe {
@@ -333,7 +338,7 @@ impl_both_mutability!(shared, &'a [T], *const T, &'a T, |ptr: *const T| {
 impl_both_mutability!(mutable, &'a mut [T], *mut T, &'a mut T, |ptr: *mut T| {
     &mut *ptr
 }, |start, end| {
-    ::std::slice::from_raw_parts_mut(start, end as usize - start as usize)
+    ::std::slice::from_raw_parts_mut(start, ptr_range_len(start, end))
 }, |haystack: &'a mut [T]| {
     let begin = haystack.as_mut_ptr();
     let end = unsafe {
