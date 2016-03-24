@@ -4,7 +4,12 @@ extern crate pattern_api_v2;
 
 pub use std::ffi::{OsStr, OsString};
 use std::ops::{Deref, DerefMut};
-pub fn os(s: &str) -> OsStrBuf {
+use std::mem;
+
+pub fn os(s: &[u8]) -> OsStrBuf {
+    let s = unsafe {
+        mem::transmute::<&[u8], &str>(s)
+    };
     OsStrBuf(s.into())
 }
 
@@ -22,7 +27,7 @@ impl DerefMut for OsStrBuf {
     #[allow(mutable_transmutes)]
     fn deref_mut(&mut self) -> &mut OsStr {
         unsafe {
-            ::std::mem::transmute::<&OsStr, &mut OsStr>(&*self.0)
+            mem::transmute::<&OsStr, &mut OsStr>(&*self.0)
         }
     }
 }
@@ -38,6 +43,7 @@ searcher_cross_test! {
         ];
         for:
 
+    //  name,         slice type: input                          pattern
         str,          &str:      "abbcbbd",                      &str:   "bb";
         str_mut,      &mut str:   &mut String::from("abbcbbd"),  &str:   "bb";
         u8_slice,     &[u8]:      b"abbcbbd",                    &[u8]:  b"bb";
@@ -46,9 +52,9 @@ searcher_cross_test! {
         slice_mut,    &mut [u32]: &mut {[1,2,2,3,2,2,4]},        &[u32]: &[2,2];
         slice2,       &[i32]:     &[-1,-2,-2,-3,-2,-2,-4],       &[i32]: &[-2,-2];
         slice2_mut,   &mut [i32]: &mut {[-1,-2,-2,-3,-2,-2,-4]}, &[i32]: &[-2,-2];
-        os_str,       &OsStr:     &os("abbcbbd"),                &OsStr: &os("bb");
-        os_str_mut,   &mut OsStr: &mut os("abbcbbd"),            &OsStr: &os("bb");
-        os_str2,      &OsStr:     &os("abbcbbd"),                &str:   "bb";
-        os_str_mut2,  &mut OsStr: &mut os("abbcbbd"),            &str:   "bb";
+        os_str,       &OsStr:     &os(b"abb\xffbbd"),            &OsStr: &os(b"bb");
+        os_str_mut,   &mut OsStr: &mut os(b"abb\xffbbd"),        &OsStr: &os(b"bb");
+        os_str2,      &OsStr:     &os(b"abb\xffbbd"),            &str:   "bb";
+        os_str_mut2,  &mut OsStr: &mut os(b"abb\xffbbd"),        &str:   "bb";
     }
 }
