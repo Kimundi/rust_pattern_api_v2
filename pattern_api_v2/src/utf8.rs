@@ -1,3 +1,38 @@
+pub trait CharEq {
+    fn matches(&mut self, char) -> bool;
+    fn only_ascii(&self) -> bool;
+}
+
+impl CharEq for char {
+    #[inline]
+    fn matches(&mut self, c: char) -> bool { *self == c }
+
+    #[inline]
+    fn only_ascii(&self) -> bool { (*self as u32) < 128 }
+}
+
+impl<F> CharEq for F where F: FnMut(char) -> bool {
+    #[inline]
+    fn matches(&mut self, c: char) -> bool { (*self)(c) }
+
+    #[inline]
+    fn only_ascii(&self) -> bool { false }
+}
+
+impl<'a> CharEq for &'a [char] {
+    #[inline]
+    fn matches(&mut self, c: char) -> bool {
+        self.iter().any(|&m| { let mut m = m; m.matches(c) })
+    }
+
+    #[inline]
+    fn only_ascii(&self) -> bool {
+        self.iter().all(|m| m.only_ascii())
+    }
+}
+
+pub struct CharEqPattern<C: CharEq>(pub C);
+
 /// Mask of the value bits of a continuation byte
 const CONT_MASK: u8 = 0b0011_1111;
 /// Value of the tag bits (tag mask is !CONT_MASK) of a continuation byte

@@ -1,38 +1,3 @@
-trait CharEq {
-    fn matches(&mut self, char) -> bool;
-    fn only_ascii(&self) -> bool;
-}
-
-impl CharEq for char {
-    #[inline]
-    fn matches(&mut self, c: char) -> bool { *self == c }
-
-    #[inline]
-    fn only_ascii(&self) -> bool { (*self as u32) < 128 }
-}
-
-impl<F> CharEq for F where F: FnMut(char) -> bool {
-    #[inline]
-    fn matches(&mut self, c: char) -> bool { (*self)(c) }
-
-    #[inline]
-    fn only_ascii(&self) -> bool { false }
-}
-
-impl<'a> CharEq for &'a [char] {
-    #[inline]
-    fn matches(&mut self, c: char) -> bool {
-        self.iter().any(|&m| { let mut m = m; m.matches(c) })
-    }
-
-    #[inline]
-    fn only_ascii(&self) -> bool {
-        self.iter().all(|m| m.only_ascii())
-    }
-}
-
-struct CharEqPattern<C: CharEq>(C);
-
 macro_rules! impl_both_mutability {
     ($module:ident, $slice:ty,
                     $cursor:ty,
@@ -117,11 +82,10 @@ macro_rules! impl_both_mutability {
             // Impl for a CharEq wrapper
             //////////////////////////////////////////////////////////////////
 
-
-            use super::{CharEq, CharEqPattern};
+            use utf8::{self, CharEq, CharEqPattern};
 
             #[derive(Clone)]
-            struct CharEqSearcher<'a, C: CharEq> {
+            pub struct CharEqSearcher<'a, C: CharEq> {
                 char_eq: C,
                 iter: Iter<'a>,
                 ascii_only: bool,
@@ -155,8 +119,6 @@ macro_rules! impl_both_mutability {
                             .unwrap_or(false)
                 }
             }
-
-            use utf8;
 
             unsafe impl<'a, C: CharEq> Searcher<$slice> for CharEqSearcher<'a, C> {
                 #[inline]
