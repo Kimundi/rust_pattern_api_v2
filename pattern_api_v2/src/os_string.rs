@@ -51,7 +51,7 @@ macro_rules! impl_both_mutability {
             use fast_sequence_search::{OrdSlice, OrdSlicePattern, OrdSeqSearcher};
             use fast_sequence_search::ByteOptimization;
 
-            pub struct StrSearcher<'a, 'b>(OrdSeqSearcher<'b, $slice>);
+            pub struct OsStrSearcher<'a, 'b>(OrdSeqSearcher<'b, $slice>);
 
             impl<'a> OrdSlice for $slice {
                 type NeedleElement = u8;
@@ -94,10 +94,35 @@ macro_rules! impl_both_mutability {
             /// Will handle the pattern `""` as returning empty matches at each character
             /// boundary.
             impl<'a, 'b> Pattern<$slice> for &'b OsStr {
-                pattern_methods!(StrSearcher<'a, 'b>,
+                pattern_methods!(OsStrSearcher<'a, 'b>,
                                 |s: &'b OsStr| OrdSlicePattern(unsafe {
                                     mem::transmute::<&'b OsStr, &'b [u8]>(s)
                                 }),
+                                OsStrSearcher,
+                                $slice);
+            }
+
+            unsafe impl<'a, 'b> Searcher<$slice> for OsStrSearcher<'a, 'b> {
+                searcher_methods!(forward, s, s.0, $cursor);
+            }
+
+            unsafe impl<'a, 'b> ReverseSearcher<$slice> for OsStrSearcher<'a, 'b> {
+                searcher_methods!(reverse, s, s.0, $cursor);
+            }
+
+            ////////////////////////////////////////////////////////////////////
+            // Impl for &str
+            ////////////////////////////////////////////////////////////////////
+
+            pub struct StrSearcher<'a, 'b>(OrdSeqSearcher<'b, $slice>);
+
+            /// Non-allocating substring search.
+            ///
+            /// Will handle the pattern `""` as returning empty matches at each character
+            /// boundary.
+            impl<'a, 'b> Pattern<$slice> for &'b str {
+                pattern_methods!(StrSearcher<'a, 'b>,
+                                |s: &'b str| OrdSlicePattern(s.as_bytes()),
                                 StrSearcher,
                                 $slice);
             }

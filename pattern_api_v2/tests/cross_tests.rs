@@ -48,5 +48,7 @@ searcher_cross_test! {
         slice2_mut,   &mut [i32]: &mut {[-1,-2,-2,-3,-2,-2,-4]}, &[i32]: &[-2,-2];
         os_str,       &OsStr:     &os("abbcbbd"),                &OsStr: &os("bb");
         os_str_mut,   &mut OsStr: &mut os("abbcbbd"),            &OsStr: &os("bb");
+        os_str2,      &OsStr:     &os("abbcbbd"),                &str:   "bb";
+        os_str_mut2,  &mut OsStr: &mut os("abbcbbd"),            &str:   "bb";
     }
 }
