@@ -2,6 +2,31 @@
 extern crate pattern_api_v2_test_support;
 extern crate pattern_api_v2;
 
+pub use std::ffi::{OsStr, OsString};
+use std::ops::{Deref, DerefMut};
+pub fn os(s: &str) -> OsStrBuf {
+    OsStrBuf(s.into())
+}
+
+pub struct OsStrBuf(OsString);
+
+impl Deref for OsStrBuf {
+    type Target = OsStr;
+    fn deref(&self) -> &OsStr {
+        &*self.0
+    }
+}
+
+impl DerefMut for OsStrBuf {
+    // I'm evil, I know >:)
+    #[allow(mutable_transmutes)]
+    fn deref_mut(&mut self) -> &mut OsStr {
+        unsafe {
+            ::std::mem::transmute::<&OsStr, &mut OsStr>(&*self.0)
+        }
+    }
+}
+
 searcher_cross_test! {
     test1 {
         double: [
@@ -21,5 +46,7 @@ searcher_cross_test! {
         slice_mut,    &mut [u32]: &mut {[1,2,2,3,2,2,4]},        &[u32]: &[2,2];
         slice2,       &[i32]:     &[-1,-2,-2,-3,-2,-2,-4],       &[i32]: &[-2,-2];
         slice2_mut,   &mut [i32]: &mut {[-1,-2,-2,-3,-2,-2,-4]}, &[i32]: &[-2,-2];
+        os_str,       &OsStr:     &os("abbcbbd"),                &OsStr: &os("bb");
+        os_str_mut,   &mut OsStr: &mut os("abbcbbd"),            &OsStr: &os("bb");
     }
 }
