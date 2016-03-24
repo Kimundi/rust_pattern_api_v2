@@ -130,7 +130,7 @@ macro_rules! impl_both_mutability {
                 fn next_match(&mut self) -> Option<($cursor, $cursor)> {
                     if self.ascii_only {
                         while let Some(b) = self.iter.next() {
-                            if self.char_eq.matches(b as char) {
+                            if b < 128 && self.char_eq.matches(b as char) {
                                 return Some(unsafe {
                                     (self.iter.start.offset(-1),
                                      self.iter.start)
@@ -154,7 +154,7 @@ macro_rules! impl_both_mutability {
                 fn next_reject(&mut self) -> Option<($cursor, $cursor)> {
                     if self.ascii_only {
                         while let Some(b) = self.iter.next() {
-                            if !self.char_eq.matches(b as char) {
+                            if b > 127 || !self.char_eq.matches(b as char) {
                                 unsafe {
                                     let reject_start = self.iter.start.offset(-1);
                                     while !utf8::byte_is_char_boundary(
@@ -184,7 +184,7 @@ macro_rules! impl_both_mutability {
                 fn next_match_back(&mut self) -> Option<($cursor, $cursor)>  {
                     if self.ascii_only {
                         while let Some(b) = self.iter.next_back() {
-                            if self.char_eq.matches(b as char) {
+                            if b < 128 && self.char_eq.matches(b as char) {
                                 return Some(unsafe {
                                     (self.iter.end,
                                      self.iter.end.offset(1))
@@ -208,7 +208,7 @@ macro_rules! impl_both_mutability {
                 fn next_reject_back(&mut self) -> Option<($cursor, $cursor)>  {
                     if self.ascii_only {
                         while let Some(b) = self.iter.next_back() {
-                            if !self.char_eq.matches(b as char) {
+                            if b > 127 || !self.char_eq.matches(b as char) {
                                 unsafe {
                                     let reject_end = self.iter.end.offset(1);
                                     while !utf8::byte_is_char_boundary(
