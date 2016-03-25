@@ -282,6 +282,14 @@ pub fn is_malformed(v: &[SearchResult], haystack_len: usize) -> bool {
                 found = true;
             }
         }
+        match e {
+            Reject(a, b) | Match(a, b) => {
+                if a > b {
+                    println!("Negative-length Interval detected at end of {:?}", &v[..i+1]);
+                    found = true;
+                }
+            }
+        }
     }
 
     if v.len() > 0 {

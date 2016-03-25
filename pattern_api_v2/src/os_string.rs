@@ -7,6 +7,15 @@
 
 */
 
+macro_rules! otry {
+    ($e:expr) => {
+        match $e {
+            Some(o) => return Some(o),
+            None => (),
+        }
+    }
+}
+
 macro_rules! impl_both_mutability {
     ($module:ident, $slice:ty,
                     $cursor:ty,
@@ -17,6 +26,99 @@ macro_rules! impl_both_mutability {
             use core_traits::*;
             use std::ffi::OsStr;
             use std::mem;
+
+            #[derive(Copy, Clone)]
+            struct Iter<'a> {
+                haystack: ($cursor, $cursor),
+                start: $cursor,
+                end: $cursor,
+                _marker: ::std::marker::PhantomData<$slice>
+            }
+
+            impl<'a> Iter<'a> {
+                #[inline]
+                fn new(haystack: $slice) -> Self {
+                    let (start, end) = $haystack_to_cursors(haystack);
+                    Iter {
+                        haystack: (start, end),
+                        start: start,
+                        end: end,
+                        _marker: ::std::marker::PhantomData,
+                    }
+                }
+
+                #[inline]
+                fn next(&mut self) -> Option<$cursor_elem> {
+                    while self.start != self.end {
+                        unsafe {
+                            let b = *self.start;
+                            self.start = self.start.offset(1);
+                            return Some(b);
+                        }
+                    }
+                    None
+                }
+
+                #[inline]
+                fn next_back(&mut self) -> Option<$cursor_elem> {
+                    while self.start != self.end {
+                        unsafe {
+                            self.end = self.end.offset(-1);
+                            let b = *self.end;
+                            return Some(b);
+                        }
+                    }
+                    None
+                }
+
+                #[inline]
+                fn skip_non_utf8(&mut self) -> Option<($cursor, $cursor)> {
+                    let original_start = self.start;
+                    while self.start != self.end {
+                        unsafe {
+                            let current_start_is_valid =
+                                utf8::ptr_range_starts_with_valid_utf8(self.start,
+                                                                       self.end);
+
+                            if current_start_is_valid {
+                                break;
+                            }
+
+                            self.start = self.start.offset(1);
+                        }
+                    }
+
+                    if original_start != self.start {
+                        Some((original_start, self.start))
+                    } else {
+                        None
+                    }
+                }
+
+                #[inline]
+                fn skip_non_utf8_reverse(&mut self) -> Option<($cursor, $cursor)> {
+                    let original_end = self.end;
+                    while self.start != self.end {
+                        unsafe {
+                            let current_end_is_valid =
+                                utf8::ptr_range_ends_with_valid_utf8(self.start,
+                                                                     self.end);
+
+                            if current_end_is_valid {
+                                break;
+                            }
+
+                            self.end = self.end.offset(-1);
+                        }
+                    }
+
+                    if original_end != self.end {
+                        Some((self.end, original_end))
+                    } else {
+                        None
+                    }
+                }
+            }
 
             impl<'a> SearchCursors for $slice {
                 type Haystack = ($cursor, $cursor);
@@ -42,6 +144,215 @@ macro_rules! impl_both_mutability {
                 fn cursor_at_back(hs: Self::Haystack) -> Self::Cursor {
                     hs.1
                 }
+            }
+
+            //////////////////////////////////////////////////////////////////
+            // Impl for a CharEq wrapper
+            //////////////////////////////////////////////////////////////////
+
+            use utf8::{self, CharEq, CharEqPattern};
+
+            #[derive(Clone)]
+            pub struct CharEqSearcher<'a, C: CharEq> {
+                char_eq: C,
+                iter: Iter<'a>,
+                ascii_only: bool,
+            }
+
+            impl<'a, C: CharEq> Pattern<$slice> for CharEqPattern<C> {
+                type Searcher = CharEqSearcher<'a, C>;
+
+                #[inline]
+                fn into_searcher(self, haystack: $slice) -> CharEqSearcher<'a, C> {
+                    CharEqSearcher {
+                        ascii_only: self.0.only_ascii(),
+                        char_eq: self.0,
+                        iter: Iter::new(haystack),
+                    }
+                }
+            }
+
+            unsafe impl<'a, C: CharEq> Searcher<$slice> for CharEqSearcher<'a, C> {
+                #[inline]
+                fn haystack(&self) -> ($cursor, $cursor) {
+                    self.iter.haystack
+                }
+
+                #[inline]
+                fn next_match(&mut self) -> Option<($cursor, $cursor)> {
+                    if self.ascii_only {
+                        while let Some(b) = {
+                            self.iter.skip_non_utf8();
+                            self.iter.next()
+                        } {
+                            if b < 128 && self.char_eq.matches(b as char) {
+                                return Some(unsafe {
+                                    (self.iter.start.offset(-1),
+                                     self.iter.start)
+                                })
+                            }
+                        }
+                    } else {
+                        while let Some(c) = {
+                            self.iter.skip_non_utf8();
+                            utf8::next_code_point(|| self.iter.next())
+                        } {
+                            if self.char_eq.matches(c) {
+                                return Some(unsafe {
+                                    (self.iter.start.offset(-(c.len_utf8() as isize)),
+                                     self.iter.start)
+                                })
+                            }
+                        }
+                    }
+                    None
+                }
+
+                #[inline]
+                fn next_reject(&mut self) -> Option<($cursor, $cursor)> {
+                    if self.ascii_only {
+                        while let Some(b) = {
+                            otry!(self.iter.skip_non_utf8());
+                            self.iter.next()
+                        } {
+                            if b > 127 || !self.char_eq.matches(b as char) {
+                                unsafe {
+                                    let reject_start = self.iter.start.offset(-1);
+                                    return Some((reject_start, self.iter.start))
+                                }
+                            }
+                        }
+                    } else {
+                        while let Some(c) = {
+                            otry!(self.iter.skip_non_utf8());
+                            utf8::next_code_point(|| self.iter.next())
+                        } {
+                            if !self.char_eq.matches(c) {
+                                return Some(unsafe {
+                                    (self.iter.start.offset(-(c.len_utf8() as isize)),
+                                     self.iter.start)
+                                })
+                            }
+                        }
+                    }
+                    None
+                }
+            }
+
+            unsafe impl<'a, C: CharEq> ReverseSearcher<$slice> for CharEqSearcher<'a, C> {
+                #[inline]
+                fn next_match_back(&mut self) -> Option<($cursor, $cursor)>  {
+                    if self.ascii_only {
+                        while let Some(b) = {
+                            self.iter.skip_non_utf8_reverse();
+                            self.iter.next_back()
+                        } {
+                            if b < 128 && self.char_eq.matches(b as char) {
+                                return Some(unsafe {
+                                    (self.iter.end,
+                                     self.iter.end.offset(1))
+                                })
+                            }
+                        }
+                    } else {
+                        while let Some(c) = {
+                            self.iter.skip_non_utf8_reverse();
+                            utf8::next_code_point_reverse(|| self.iter.next_back())
+                        } {
+                            if self.char_eq.matches(c) {
+                                return Some(unsafe {
+                                    (self.iter.end,
+                                     self.iter.end.offset(c.len_utf8() as isize))
+                                })
+                            }
+                        }
+                    }
+                    None
+                }
+
+                #[inline]
+                fn next_reject_back(&mut self) -> Option<($cursor, $cursor)>  {
+                    if self.ascii_only {
+                        while let Some(b) = {
+                            otry!(self.iter.skip_non_utf8_reverse());
+                            self.iter.next_back()
+                        } {
+                            if b > 127 || !self.char_eq.matches(b as char) {
+                                unsafe {
+                                    let reject_end = self.iter.end.offset(1);
+                                    return Some((self.iter.end, reject_end))
+                                }
+                            }
+                        }
+                    } else {
+                        while let Some(c) = {
+                            otry!(self.iter.skip_non_utf8_reverse());
+                            utf8::next_code_point_reverse(|| self.iter.next_back())
+                        } {
+                            if !self.char_eq.matches(c) {
+                                return Some(unsafe {
+                                    (self.iter.end,
+                                     self.iter.end.offset(c.len_utf8() as isize))
+                                })
+                            }
+                        }
+                    }
+                    None
+                }
+            }
+
+            impl<'a, C: CharEq> DoubleEndedSearcher<$slice> for CharEqSearcher<'a, C> {}
+
+            /////////////////////////////////////////////////////////////////////////////
+            // Impl for char
+            /////////////////////////////////////////////////////////////////////////////
+
+            /// Associated type for `<char as Pattern<&'a str>>::Searcher`.
+            #[derive(Clone)]
+            pub struct CharSearcher<'a>(CharEqSearcher<'a, char>);
+
+            unsafe impl<'a> Searcher<$slice> for CharSearcher<'a> {
+                searcher_methods!(forward, s, s.0, $cursor);
+            }
+
+            unsafe impl<'a> ReverseSearcher<$slice> for CharSearcher<'a> {
+                searcher_methods!(reverse, s, s.0, $cursor);
+            }
+
+            impl<'a> DoubleEndedSearcher<$slice> for CharSearcher<'a> {}
+
+            /// Searches for chars that are equal to a given char
+            impl<'a> Pattern<$slice> for char {
+                pattern_methods!(CharSearcher<'a>, CharEqPattern, CharSearcher, $slice);
+            }
+
+            /////////////////////////////////////////////////////////////////////////////
+            // Impl for F: FnMut(char) -> bool
+            /////////////////////////////////////////////////////////////////////////////
+
+            /// Associated type for `<F as Pattern<&'a str>>::Searcher`.
+            #[derive(Clone)]
+            pub struct CharPredicateSearcher<'a, F>(CharEqSearcher<'a, F>)
+                where F: FnMut(char) -> bool;
+
+            unsafe impl<'a, F> Searcher<$slice> for CharPredicateSearcher<'a, F>
+                where F: FnMut(char) -> bool
+            {
+                searcher_methods!(forward, s, s.0, $cursor);
+            }
+
+            unsafe impl<'a, F> ReverseSearcher<$slice> for CharPredicateSearcher<'a, F>
+                where F: FnMut(char) -> bool
+            {
+                searcher_methods!(reverse, s, s.0, $cursor);
+            }
+
+            impl<'a, F> DoubleEndedSearcher<$slice> for CharPredicateSearcher<'a, F>
+                where F: FnMut(char) -> bool {}
+
+            /// Searches for chars that match the given predicate
+            impl<'a, F> Pattern<$slice> for F where F: FnMut(char) -> bool {
+                pattern_methods!(CharPredicateSearcher<'a, F>, CharEqPattern, CharPredicateSearcher, $slice);
             }
 
             ////////////////////////////////////////////////////////////////////

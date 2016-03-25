@@ -131,3 +131,116 @@ pub fn next_code_point_reverse<F>(mut next_byte_back: F) -> Option<char>
 pub fn byte_is_char_boundary(b: u8) -> bool {
     b < 128 || b >= 192
 }
+
+#[inline]
+pub unsafe fn ptr_range_starts_with_valid_utf8(start: *const u8, end: *const u8) -> bool {
+    let len = end as usize - start as usize;
+    let len = ::std::cmp::min(len, 4);
+    let s: &[u8] = ::std::slice::from_raw_parts(start, len);
+    match ::std::str::from_utf8(s) {
+        Ok(_) => true,
+        Err(e) if e.valid_up_to() > 0 => true,
+        _ => false,
+    }
+}
+
+#[test]
+fn test_ptr_range_starts_with_valid_utf8() {
+    let check = |s: &'static [u8]| unsafe {
+        ptr_range_starts_with_valid_utf8(s.as_ptr(), s.as_ptr().offset(s.len() as isize))
+    };
+
+    assert!(check(b"abcde"));
+    assert!(check(b"abcd"));
+    assert!(check(b"abc"));
+    assert!(check(b"a"));
+    assert!(check(b""));
+
+    assert!(check(b"abcd\xff"));
+    assert!(check(b"abcd\xbe"));
+    assert!(check(b"abc\xff"));
+    assert!(check(b"abc\xbe"));
+    assert!(check(b"ab\xff"));
+    assert!(check(b"ab\xbe"));
+    assert!(check(b"a\xff"));
+    assert!(check(b"a\xbe"));
+
+    assert!(!check(b"\xff"));
+    assert!(!check(b"\xbe"));
+    assert!(!check(b"\xff\xff\xff\xff\xff"));
+    assert!(!check(b"\xbe\xbe\xbe\xbe\xbe"));
+
+    assert!(!check(b"\xff1"));
+    assert!(!check(b"\xbe1"));
+    assert!(!check(b"\xff12"));
+    assert!(!check(b"\xbe12"));
+    assert!(!check(b"\xff123"));
+    assert!(!check(b"\xbe123"));
+    assert!(!check(b"\xff1234"));
+    assert!(!check(b"\xbe1234"));
+}
+
+#[inline]
+pub unsafe fn ptr_range_ends_with_valid_utf8(start: *const u8, mut end: *const u8) -> bool {
+    let original_end = end;
+    // Search for a valid utf8 start sequence in the up to last 4 bytes
+    while start != end && (original_end as usize - end as usize) <= 4 {
+        end = end.offset(-1);
+        // Do a somewhat inefficient chain of operations.
+        // This should probably be optimized.
+
+        // If there could be a char here...
+        if byte_is_char_boundary(*end) {
+            // ... and there is a char here...
+            if ptr_range_starts_with_valid_utf8(end, original_end) {
+                // ... subtract its length...
+                next_code_point(|| {
+                    let r = Some(*end);
+                    end = end.offset(1);
+                    r
+                });
+
+                // ... and finally return whether there are invalid bytes in between
+                return end == original_end;
+            }
+        }
+    }
+    end == original_end
+}
+
+#[test]
+fn test_ptr_range_ends_with_valid_utf8() {
+    let check = |s: &'static [u8]| unsafe {
+        ptr_range_ends_with_valid_utf8(s.as_ptr(), s.as_ptr().offset(s.len() as isize))
+    };
+
+    assert!(check(b"abcde"));
+    assert!(check(b"abcd"));
+    assert!(check(b"abc"));
+    assert!(check(b"a"));
+    assert!(check(b""));
+
+    assert!(!check(b"abcd\xff"));
+    assert!(!check(b"abcd\xbe"));
+    assert!(!check(b"abc\xff"));
+    assert!(!check(b"abc\xbe"));
+    assert!(!check(b"ab\xff"));
+    assert!(!check(b"ab\xbe"));
+    assert!(!check(b"a\xff"));
+    assert!(!check(b"a\xbe"));
+
+    assert!(!check(b"\xff"));
+    assert!(!check(b"\xbe"));
+    assert!(!check(b"\xff\xff\xff\xff\xff"));
+    assert!(!check(b"\xbe\xbe\xbe\xbe\xbe"));
+
+    assert!(check(b"\xff1"));
+    assert!(check(b"\xbe1"));
+    assert!(check(b"\xff12"));
+    assert!(check(b"\xbe12"));
+    assert!(check(b"\xff123"));
+    assert!(check(b"\xbe123"));
+    assert!(check(b"\xff1234"));
+    assert!(check(b"\xbe1234"));
+}
+
