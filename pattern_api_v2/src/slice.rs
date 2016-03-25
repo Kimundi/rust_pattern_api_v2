@@ -267,7 +267,7 @@ macro_rules! impl_both_mutability {
             ////////////////////////////////////////////////////////////////////
 
             use fast_sequence_search::{OrdSlice, OrdSlicePattern, OrdSeqSearcher};
-            use fast_sequence_search::NoOptimization;
+            use fast_sequence_search::{NoOptimization};
 
             pub struct SliceSearcher<'a, 'b, T: 'a + 'b + Ord>(OrdSeqSearcher<'b, $slice>);
 
@@ -299,6 +299,15 @@ macro_rules! impl_both_mutability {
                     hs.0.offset(offset as isize)
                 }
             }
+
+            // TODO: Specialize
+            /*
+            use fast_sequence_search::{ByteOptimization};
+            type ByteSlice<'a, T> = $slice;
+            impl<'a> OrdSlice for ByteSlice<'a, u8> {
+                type FastSkipOptimization = ByteOptimization;
+            }
+            */
 
             /// Non-allocating substring search.
             ///

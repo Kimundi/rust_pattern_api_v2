@@ -1,4 +1,5 @@
 #![feature(str_char)]
+#![feature(specialization)]
 
 #[macro_use]
 mod macros;
