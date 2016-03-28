@@ -482,3 +482,35 @@ impl<T: DoubleEndedIterator> AssertSingleEnded for T {
         true
     }
 }
+
+#[macro_export]
+macro_rules! s {
+    ($s:expr) => (& *$crate::s($s))
+}
+
+#[macro_export]
+macro_rules! ms {
+    ($s:expr) => (&mut *$crate::s($s))
+}
+
+#[macro_export]
+macro_rules! os {
+    ($s:expr) => (& *$crate::os($s))
+}
+
+#[macro_export]
+macro_rules! mos {
+    ($s:expr) => (&mut *$crate::os($s))
+}
+
+#[macro_export]
+macro_rules! sl {
+    ($s:expr) => (&{*$s}[..]);
+    ($s:expr, $($ss:expr),*) => (&[$s, $($ss),*][..]);
+}
+
+#[macro_export]
+macro_rules! msl {
+    ($s:expr) => (&mut{*$s}[..]);
+    ($s:expr, $($ss:expr),*) => (&mut[$s, $($ss),*][..]);
+}

@@ -296,3 +296,74 @@ generate_pattern_iterators! {
         MatchesInternal yielding (H);
     delegate double ended;
 }
+
+///////////////////////////////////////////////////////////////////////////////
+// .match_indices()
+///////////////////////////////////////////////////////////////////////////////
+
+derive_pattern_clone!{
+    clone MatchIndicesInternal
+    with |s| MatchIndicesInternal(s.0.clone())
+}
+
+struct MatchIndicesInternal<H, P>(P::Searcher)
+    where P: Pattern<H>,
+          H: SearchCursors;
+
+impl<H, P: Pattern<H>> fmt::Debug for MatchIndicesInternal<H, P>
+    where P::Searcher: fmt::Debug,
+          P: Pattern<H>,
+          H: SearchCursors
+{
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.debug_tuple("MatchIndicesInternal")
+            .field(&self.0)
+            .finish()
+    }
+}
+
+impl<H, P> MatchIndicesInternal<H, P>
+    where P: Pattern<H>,
+          H: SearchCursors,
+{
+    #[inline]
+    fn new(h: H, p: P) -> Self {
+        MatchIndicesInternal(p.into_searcher(h))
+    }
+
+    #[inline]
+    fn next(&mut self) -> Option<(usize, H)> {
+        self.0.next_match().map(|(a, b)| unsafe {
+            (H::offset_from_front(self.0.haystack(), a),
+             H::range_to_self(self.0.haystack(), a, b))
+        })
+    }
+
+    #[inline]
+    fn next_back(&mut self) -> Option<(usize, H)>
+        where P::Searcher: ReverseSearcher<H>
+    {
+        self.0.next_match_back().map(|(a, b)| unsafe {
+            (H::offset_from_front(self.0.haystack(), a),
+             H::range_to_self(self.0.haystack(), a, b))
+        })
+    }
+}
+
+generate_pattern_iterators! {
+    forward:
+        /// Created with the method [`match_indices()`].
+        ///
+        /// [`match_indices()`]: ../../std/primitive.str.html#method.match_indices
+        struct MatchIndices;
+    reverse:
+        /// Created with the method [`rmatch_indices()`].
+        ///
+        /// [`rmatch_indices()`]: ../../std/primitive.str.html#method.rmatch_indices
+        struct RMatchIndices;
+    stability:
+        //#[stable(feature = "str_match_indices", since = "1.5.0")]
+    internal:
+        MatchIndicesInternal yielding ((usize, H));
+    delegate double ended;
+}
