@@ -367,3 +367,155 @@ generate_pattern_iterators! {
         MatchIndicesInternal yielding ((usize, H));
     delegate double ended;
 }
+
+///////////////////////////////////////////////////////////////////////////////
+// .split()
+///////////////////////////////////////////////////////////////////////////////
+
+derive_pattern_clone!{
+    clone SplitInternal
+    with |s| SplitInternal { matcher: s.matcher.clone(), ..*s }
+}
+
+struct SplitInternal<H, P>
+    where P: Pattern<H>,
+          H: SearchCursors,
+{
+    start: H::Cursor,
+    end: H::Cursor,
+    matcher: P::Searcher,
+    allow_trailing_empty: bool,
+    finished: bool,
+}
+
+impl<H, P> fmt::Debug for SplitInternal<H, P>
+    where P::Searcher: fmt::Debug,
+          P: Pattern<H>,
+          H: SearchCursors,
+{
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.debug_struct("SplitInternal")
+            /*
+            TODO: How to handle this?
+            .field("start", &self.start)
+            .field("end", &self.end)
+            .field("matcher", &self.matcher)
+            */
+            .field("allow_trailing_empty", &self.allow_trailing_empty)
+            .field("finished", &self.finished)
+            .finish()
+    }
+}
+
+impl<H, P> SplitInternal<H, P>
+    where P: Pattern<H>,
+          H: SearchCursors,
+{
+    #[inline]
+    fn new(h: H, p: P) -> Self {
+        let matcher = p.into_searcher(h);
+        let start = H::cursor_at_front(matcher.haystack());
+        let end = H::cursor_at_back(matcher.haystack());
+
+        SplitInternal {
+            start: start,
+            end: end,
+            matcher: matcher,
+            allow_trailing_empty: true,
+            finished: false,
+        }
+    }
+
+    #[inline]
+    fn get_end(&mut self) -> Option<H> {
+        let h = self.matcher.haystack();
+        let diff = |start: H::Cursor, end: H::Cursor| {
+            H::cursor_diff(h, start, end)
+        };
+        if !self.finished && (self.allow_trailing_empty || diff(self.start, self.end) > 0) {
+            self.finished = true;
+            unsafe {
+                let string = H::range_to_self(self.matcher.haystack(),
+                                              self.start,
+                                              self.end);
+                Some(string)
+            }
+        } else {
+            None
+        }
+    }
+
+    #[inline]
+    fn next(&mut self) -> Option<H> {
+        if self.finished { return None }
+
+        match self.matcher.next_match() {
+            Some((a, b)) => unsafe {
+                let elt = H::range_to_self(self.matcher.haystack(),
+                                           self.start,
+                                           a);
+                self.start = b;
+                Some(elt)
+            },
+            None => self.get_end(),
+        }
+    }
+
+    #[inline]
+    fn next_back(&mut self) -> Option<H>
+        where P::Searcher: ReverseSearcher<H>
+    {
+        if self.finished { return None }
+
+        if !self.allow_trailing_empty {
+            self.allow_trailing_empty = true;
+            match self.next_back() {
+                Some(elt) => {
+                    let (elt, len) = elt.extract(|h, a, b| {
+                        H::cursor_diff(h, a, b)
+                    });
+                    if len > 0 {
+                        return Some(elt)
+                    } else if self.finished {
+                        return None
+                    }
+                },
+                _ => if self.finished { return None }
+            }
+        }
+
+        match self.matcher.next_match_back() {
+            Some((a, b)) => unsafe {
+                let elt = H::range_to_self(self.matcher.haystack(),
+                                           b,
+                                           self.end);
+                self.end = a;
+                Some(elt)
+            },
+            None => unsafe {
+                self.finished = true;
+                Some(H::range_to_self(self.matcher.haystack(),
+                                      self.start,
+                                      self.end))
+            },
+        }
+    }
+}
+
+generate_pattern_iterators! {
+    forward:
+        /// Created with the method [`split()`].
+        ///
+        /// [`split()`]: ../../std/primitive.str.html#method.split
+        struct Split;
+    reverse:
+        /// Created with the method [`rsplit()`].
+        ///
+        /// [`rsplit()`]: ../../std/primitive.str.html#method.rsplit
+        struct RSplit;
+    stability:
+        //#[stable(feature = "rust1", since = "1.0.0")]
+    internal:
+        SplitInternal yielding (H);
+    delegate double ended;
+}

@@ -46,6 +46,7 @@ pub trait SearchCursors: Sized {
     type Cursor: Copy + Eq + Ord;
 
     fn into_haystack(self) -> Self::Haystack;
+
     fn offset_from_front(hs: Self::Haystack, begin: Self::Cursor) -> usize;
     fn cursor_at_front(hs: Self::Haystack) -> Self::Cursor;
     fn cursor_at_back(hs: Self::Haystack) -> Self::Cursor;
@@ -58,6 +59,25 @@ pub trait SearchCursors: Sized {
         let haystack = hs;
         let back = Self::cursor_at_back(haystack);
         Self::offset_from_front(haystack, back)
+    }
+
+    fn cursor_diff(haystack: Self::Haystack,
+                   start: Self::Cursor,
+                   end: Self::Cursor) -> usize {
+        Self::offset_from_front(haystack, end)
+        - Self::offset_from_front(haystack, start)
+    }
+
+    fn extract<T, F>(self, mut f: F) -> (Self, T)
+        where F: FnMut(Self::Haystack, Self::Cursor, Self::Cursor) -> T
+    {
+        let h = self.into_haystack();
+        let a = Self::cursor_at_front(h);
+        let b = Self::cursor_at_back(h);
+        unsafe {
+            let t = f(h, a, b);
+            (Self::range_to_self(h, a, b), t)
+        }
     }
 }
 

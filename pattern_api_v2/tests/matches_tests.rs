@@ -23,6 +23,7 @@ iterator_cross_test! {
         os_str_mut_str, &mut OsStr: &mut os(b"abbcbbd"), _: "bb",
             [&*os(b"bb"), &*os(b"bb")],
             [&*os(b"bb"), &*os(b"bb")]
+
         os_str_os, &OsStr: &os(b"abbcbbd"), _: &*os(b"bb"),
             [&*os(b"bb"), &*os(b"bb")],
             [&*os(b"bb"), &*os(b"bb")]
@@ -36,6 +37,7 @@ iterator_cross_test! {
         u8_mut, &mut [u8]: &mut{*b"abbcbbd"}, &[_]: b"bb",
             [b"bb", b"bb"],
             [b"bb", b"bb"]
+
         i32, &[i32]: &{[1,-2,-2,3,-2,-2,4]}, &[_]: &[-2, -2],
             [&[-2, -2], &[-2, -2]],
             [&[-2, -2], &[-2, -2]]
