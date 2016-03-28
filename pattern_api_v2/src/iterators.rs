@@ -58,7 +58,7 @@ macro_rules! generate_pattern_iterators {
 
         // Internal almost-iterator that is being delegated to
         internal:
-            $internal_iterator:ident yielding ($iterty:ty);
+            $internal_iterator:ident($($iterarg_ident:ident: $iterarg_ty:ty),*) yielding ($iterty:ty);
 
         // Kind of delgation - either single ended or double ended
         delegate $($t:tt)*
@@ -75,8 +75,8 @@ macro_rules! generate_pattern_iterators {
                   H: SearchCursors,
         {
             #[inline]
-            pub fn new(h: H, p: P) -> Self {
-                $forward_iterator($internal_iterator::new(h, p))
+            pub fn new(h: H, p: P $(,$iterarg_ident: $iterarg_ty)*) -> Self {
+                $forward_iterator($internal_iterator::new(h, p $(,$iterarg_ident)*))
             }
         }
 
@@ -129,8 +129,8 @@ macro_rules! generate_pattern_iterators {
                   H: SearchCursors,
         {
             #[inline]
-            pub fn new(h: H, p: P) -> Self {
-                $reverse_iterator($internal_iterator::new(h, p))
+            pub fn new(h: H, p: P $(,$iterarg_ident: $iterarg_ty)*) -> Self {
+                $reverse_iterator($internal_iterator::new(h, p $(,$iterarg_ident)*))
             }
         }
 
@@ -293,7 +293,7 @@ generate_pattern_iterators! {
     stability:
         //#[stable(feature = "str_matches", since = "1.2.0")]
     internal:
-        MatchesInternal yielding (H);
+        MatchesInternal() yielding (H);
     delegate double ended;
 }
 
@@ -364,7 +364,7 @@ generate_pattern_iterators! {
     stability:
         //#[stable(feature = "str_match_indices", since = "1.5.0")]
     internal:
-        MatchIndicesInternal yielding ((usize, H));
+        MatchIndicesInternal() yielding ((usize, H));
     delegate double ended;
 }
 
@@ -516,6 +516,153 @@ generate_pattern_iterators! {
     stability:
         //#[stable(feature = "rust1", since = "1.0.0")]
     internal:
-        SplitInternal yielding (H);
+        SplitInternal() yielding (H);
     delegate double ended;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// .split_terminator()
+///////////////////////////////////////////////////////////////////////////////
+
+derive_pattern_clone!{
+    clone SplitTerminatorInternal
+    with |s| SplitTerminatorInternal(s.0.clone())
+}
+
+struct SplitTerminatorInternal<H, P>(SplitInternal<H, P>)
+    where P: Pattern<H>,
+          H: SearchCursors;
+
+impl<H, P> fmt::Debug for SplitTerminatorInternal<H, P>
+    where P::Searcher: fmt::Debug,
+          P: Pattern<H>,
+          H: SearchCursors,
+{
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        self.0.fmt(f)
+    }
+}
+
+impl<H, P> SplitTerminatorInternal<H, P>
+    where P: Pattern<H>,
+          H: SearchCursors,
+{
+    #[inline]
+    fn new(h: H, p: P) -> Self {
+        let mut s = SplitInternal::new(h, p);
+        s.allow_trailing_empty = false;
+        SplitTerminatorInternal(s)
+    }
+
+    #[inline]
+    fn next(&mut self) -> Option<H> {
+        self.0.next()
+    }
+
+    #[inline]
+    fn next_back(&mut self) -> Option<H>
+        where P::Searcher: ReverseSearcher<H>
+    {
+        self.0.next_back()
+    }
+}
+
+generate_pattern_iterators! {
+    forward:
+        /// Created with the method [`split_terminator()`].
+        ///
+        /// [`split_terminator()`]: ../../std/primitive.str.html#method.split_terminator
+        struct SplitTerminator;
+    reverse:
+        /// Created with the method [`rsplit_terminator()`].
+        ///
+        /// [`rsplit_terminator()`]: ../../std/primitive.str.html#method.rsplit_terminator
+        struct RSplitTerminator;
+    stability:
+        //#[stable(feature = "rust1", since = "1.0.0")]
+    internal:
+        SplitTerminatorInternal() yielding (H);
+    delegate double ended;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// .splitn()
+///////////////////////////////////////////////////////////////////////////////
+
+derive_pattern_clone!{
+    clone SplitNInternal
+    with |s| SplitNInternal { iter: s.iter.clone(), ..*s }
+}
+
+struct SplitNInternal<H, P>
+    where P: Pattern<H>,
+          H: SearchCursors,
+{
+    iter: SplitInternal<H, P>,
+    /// The number of splits remaining
+    count: usize,
+}
+
+impl<H, P> fmt::Debug for SplitNInternal<H, P>
+    where P: Pattern<H>,
+          H: SearchCursors,
+          P::Searcher: fmt::Debug
+{
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.debug_struct("SplitNInternal")
+            .field("iter", &self.iter)
+            .field("count", &self.count)
+            .finish()
+    }
+}
+
+impl<H, P> SplitNInternal<H, P>
+    where P: Pattern<H>,
+          H: SearchCursors,
+{
+    #[inline]
+    fn new(h: H, p: P, count: usize) -> Self {
+        SplitNInternal {
+            iter: SplitInternal::new(h, p),
+            count: count
+        }
+    }
+
+    #[inline]
+    fn next(&mut self) -> Option<H> {
+        match self.count {
+            0 => None,
+            1 => { self.count = 0; self.iter.get_end() }
+            _ => { self.count -= 1; self.iter.next() }
+        }
+    }
+
+    #[inline]
+    fn next_back(&mut self) -> Option<H>
+        where P::Searcher: ReverseSearcher<H>
+    {
+        match self.count {
+            0 => None,
+            1 => { self.count = 0; self.iter.get_end() }
+            _ => { self.count -= 1; self.iter.next_back() }
+        }
+    }
+}
+
+generate_pattern_iterators! {
+    forward:
+        /// Created with the method [`splitn()`].
+        ///
+        /// [`splitn()`]: ../../std/primitive.str.html#method.splitn
+        struct SplitN;
+    reverse:
+        /// Created with the method [`rsplitn()`].
+        ///
+        /// [`rsplitn()`]: ../../std/primitive.str.html#method.rsplitn
+        struct RSplitN;
+    stability:
+        //#[stable(feature = "rust1", since = "1.0.0")]
+    internal:
+        SplitNInternal(count: usize) yielding (H);
+    delegate single ended;
 }
