@@ -6,6 +6,7 @@ mod macros;
 
 /* TODO & Notes
     - Name: Maybe SequencePattern ?
+    - Name: rename OrdSlice/SearchCursors to something like PatternHaystack
     - Replace Iter structs with lib std slice iterators (need ptr access)
     - string stuff for [char]
     - osstring:
@@ -21,6 +22,8 @@ mod macros;
             - example: &OsStr split on &str yielding &OsStr segments
             - though explicit remaping not really needed if normal
               splitting already returns the same values
+    - OsStr iteration! Right now each position is valid, which might be
+      wrong for unicode sections in it. eg, split("")
 
 */
 

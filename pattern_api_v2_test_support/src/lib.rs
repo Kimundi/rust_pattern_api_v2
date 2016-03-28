@@ -1,3 +1,5 @@
+#![feature(specialization)]
+
 extern crate pattern_api_v2 as pattern;
 
 use pattern::Pattern;
@@ -252,7 +254,8 @@ where F: FnMut(&mut Callback),
     // Validate and emit diagnostics
 
     if is_malformed(&v, hs_len) {
-        panic!("searcher impl outputted invalid search results");
+        //println!("Should be: {:?}", right);
+        //panic!("searcher impl outputted invalid search results");
     }
 
     if let Some(right) = right {
@@ -313,4 +316,169 @@ pub fn compare(left: &[SearchResult], right: &[SearchResult], haystack_len: usiz
     }
 
     assert!(left == right, "\n  searcher:  {:?}\n  should-be: {:?}\n", left, right);
+}
+
+
+#[macro_export]
+macro_rules! iterator_cross_test {
+    (
+        single, $new:expr, {
+            $(
+                $tname:ident,
+                $hty:ty: $h:expr, $pty:ty: $p:expr,
+                [$($v:expr),*]
+            )*
+        }
+        $($tts:tt)*
+    ) => {
+        $(
+            #[test]
+            fn $tname() {
+                use $crate::AssertSingleEnded;
+                let vs = [$($v),*];
+                let mut rvs = [$($v),*];
+                rvs.reverse();
+
+                let (h, p): ($hty, $pty) = ($h, $p);
+
+                let iterator = $new(h, p);
+                assert!(!iterator.is_double_ended(),
+                        "Iterator is more than just single ended!");
+                let iterator_results = iterator.collect::<Vec<_>>();
+                assert_eq!(iterator_results, vs);
+            }
+        )*
+        iterator_cross_test!($($tts)*);
+    };
+    (
+        forward-backward, $new:expr, $rnew:expr, {
+            $(
+                $tname:ident,
+                $hty:ty: $h:expr, $pty:ty: $p:expr,
+                [$($v:expr),*], [$($rv:expr),*]
+            )*
+        }
+        $($tts:tt)*
+    ) => {
+        $(
+            #[test]
+            fn $tname() {
+                use $crate::AssertSingleEnded;
+                let vs = [$($v),*];
+                let mut rvs = [$($v),*];
+                rvs.reverse();
+
+                let (h, p): ($hty, $pty) = ($h, $p);
+
+                let iterator = $new(h, p);
+                assert!(!iterator.is_double_ended(),
+                        "Iterator is more than just single ended!");
+                let iterator_results = iterator.collect::<Vec<_>>();
+                assert_eq!(iterator_results, vs);
+
+                let (h, p): ($hty, $pty) = ($h, $p);
+                let riterator = $rnew(h, p);
+                assert!(!riterator.is_double_ended(),
+                        "Reverse Iterator is more than just single ended!");
+                let mut riterator_results = riterator.collect::<Vec<_>>();
+                riterator_results.reverse();
+                assert_eq!(riterator_results, vs);
+            }
+        )*
+        iterator_cross_test!($($tts)*);
+    };
+    (
+        double, $new:expr, $rnew:expr, {
+            $(
+                $tname:ident,
+                $hty:ty: $h:expr, $pty:ty: $p:expr,
+                [$($v:expr),*]
+            )*
+        }
+        $($tts:tt)*
+    ) => {
+        $(
+            #[test]
+            fn $tname() {
+                use $crate::AssertSingleEnded;
+                let vs = [$($v),*];
+                let mut rvs = [$($v),*];
+                rvs.reverse();
+
+                let (h, p): ($hty, $pty) = ($h, $p);
+
+                let iterator = $new(h, p);
+                assert!(iterator.is_double_ended(),
+                        "Iterator is more than just single ended!");
+                let iterator_results = iterator.collect::<Vec<_>>();
+                assert_eq!(iterator_results, vs);
+                let (h, p): ($hty, $pty) = ($h, $p);
+                assert_eq!($new(h, p).rev().collect::<Vec<_>>(), rvs);
+
+                let (h, p): ($hty, $pty) = ($h, $p);
+                let riterator = $rnew(h, p);
+                assert!(riterator.is_double_ended(),
+                        "Reverse Iterator is more than just single ended!");
+                let mut riterator_results = riterator.collect::<Vec<_>>();
+                riterator_results.reverse();
+                assert_eq!(riterator_results, vs);
+                let (h, p): ($hty, $pty) = ($h, $p);
+                let mut rriterator_results = $rnew(h, p).rev().collect::<Vec<_>>();
+                rriterator_results.reverse();
+                assert_eq!(rriterator_results, rvs);
+            }
+        )*
+        iterator_cross_test!($($tts)*);
+    };
+    () => ()
+}
+
+pub use std::ffi::{OsStr, OsString};
+use std::ops::{Deref, DerefMut};
+use std::mem;
+
+pub fn os(s: &[u8]) -> OsStrBuf {
+    let s = unsafe {
+        mem::transmute::<&[u8], &str>(s)
+    };
+    OsStrBuf(s.into())
+}
+
+pub struct OsStrBuf(OsString);
+
+impl Deref for OsStrBuf {
+    type Target = OsStr;
+    fn deref(&self) -> &OsStr {
+        &*self.0
+    }
+}
+
+impl DerefMut for OsStrBuf {
+    // I'm evil, I know >:)
+    #[allow(mutable_transmutes)]
+    fn deref_mut(&mut self) -> &mut OsStr {
+        unsafe {
+            mem::transmute::<&OsStr, &mut OsStr>(&*self.0)
+        }
+    }
+}
+
+pub fn s(s: &str) -> String {
+    String::from(s)
+}
+
+pub trait AssertSingleEnded {
+    fn is_double_ended(&self) -> bool;
+}
+
+impl<T: Iterator> AssertSingleEnded for T {
+    default fn is_double_ended(&self) -> bool {
+        false
+    }
+}
+
+impl<T: DoubleEndedIterator> AssertSingleEnded for T {
+    fn is_double_ended(&self) -> bool {
+        true
+    }
 }

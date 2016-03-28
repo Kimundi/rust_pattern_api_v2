@@ -369,30 +369,23 @@ macro_rules! impl_both_mutability {
                 type FastSkipOptimization = ByteOptimization;
 
                 fn next_valid_pos(hs: &Self::Haystack, pos: usize) -> Option<usize> {
-                    let s = unsafe {
-                        ::std::str::from_utf8_unchecked(Self::haystack_as_slice(hs))
-                    };
-                    s[pos..].chars().next().map(|c| pos + c.len_utf8())
+                    let s = Self::haystack_as_slice(hs);
+                    s[pos..].iter().next().map(|_| pos + 1)
                 }
 
                 fn next_valid_pos_back(hs: &Self::Haystack, pos: usize) -> Option<usize> {
-                    let s = unsafe {
-                        ::std::str::from_utf8_unchecked(Self::haystack_as_slice(hs))
-                    };
-                    s[..pos].chars().next_back().map(|c| pos - c.len_utf8())
+                    let s = Self::haystack_as_slice(hs);
+                    s[..pos].iter().next_back().map(|_| pos - 1)
                 }
 
                 fn haystack_as_slice<'t>(hs: &'t Self::Haystack) -> &'t [Self::NeedleElement] {
                     unsafe {
-                        ::std::slice::from_raw_parts(hs.0, hs.1 as usize - hs.0 as usize)
+                        mem::transmute($cursors_to_haystack(hs.0, hs.1))
                     }
                 }
 
-                fn pos_is_valid(hs: &Self::Haystack, pos: usize) -> bool {
-                    let s = unsafe {
-                        ::std::str::from_utf8_unchecked(Self::haystack_as_slice(hs))
-                    };
-                    s.is_char_boundary(pos)
+                fn pos_is_valid(_: &Self::Haystack, _: usize) -> bool {
+                    true
                 }
 
                 unsafe fn cursor_at_offset(hs: Self::Haystack, offset: usize) -> Self::Cursor {
