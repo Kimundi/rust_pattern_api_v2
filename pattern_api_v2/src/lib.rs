@@ -42,4 +42,6 @@ pub mod iterators;
 
 pub mod experimental;
 
+pub mod std_integration;
+
 pub use core_traits::*;
