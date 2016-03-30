@@ -55,6 +55,7 @@ macro_rules! impl_both_mutability {
             impl<'a> SearchCursors for $slice {
                 type Haystack = ($cursor, $cursor);
                 type Cursor = $cursor;
+                type MatchType = $slice;
 
                 fn into_haystack(self) -> Self::Haystack {
                     $haystack_to_cursors(self)
@@ -67,7 +68,7 @@ macro_rules! impl_both_mutability {
 
                 unsafe fn range_to_self(_: Self::Haystack,
                                         start: Self::Cursor,
-                                        end: Self::Cursor) -> Self {
+                                        end: Self::Cursor) -> Self::MatchType {
                     ($cursors_to_haystack)(start, end)
                 }
                 fn cursor_at_front(hs: Self::Haystack) -> Self::Cursor {
@@ -76,6 +77,7 @@ macro_rules! impl_both_mutability {
                 fn cursor_at_back(hs: Self::Haystack) -> Self::Cursor {
                     hs.1
                 }
+                fn match_type_len(mt: &Self::MatchType) -> usize { mt.len() }
             }
 
             //////////////////////////////////////////////////////////////////

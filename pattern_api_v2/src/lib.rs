@@ -1,5 +1,7 @@
 #![feature(str_char)]
 #![feature(specialization)]
+#![feature(associated_type_defaults)]
+#![feature(osstring_simple_functions)]
 
 #[macro_use]
 mod macros;

@@ -84,7 +84,7 @@ pub trait IteratorConstructors: SearchCursors {
     }
 
     #[inline]
-    fn trim_matches<P: Pattern<Self>>(self, pat: P) -> Self
+    fn trim_matches<P: Pattern<Self>>(self, pat: P) -> Self::MatchType
         where P::Searcher: DoubleEndedSearcher<Self>
     {
         let mut matcher = pat.into_searcher(self);
@@ -105,7 +105,7 @@ pub trait IteratorConstructors: SearchCursors {
     }
 
     #[inline]
-    fn trim_left_matches<P: Pattern<Self>>(self, pat: P) -> Self {
+    fn trim_left_matches<P: Pattern<Self>>(self, pat: P) -> Self::MatchType {
         let mut matcher = pat.into_searcher(self);
         let mut i = Self::cursor_at_back(matcher.haystack());
         let j = Self::cursor_at_back(matcher.haystack());
@@ -119,7 +119,7 @@ pub trait IteratorConstructors: SearchCursors {
     }
 
     #[inline]
-    fn trim_right_matches<P: Pattern<Self>>(self, pat: P) -> Self
+    fn trim_right_matches<P: Pattern<Self>>(self, pat: P) -> Self::MatchType
         where P::Searcher: ReverseSearcher<Self>
     {
         let mut matcher = pat.into_searcher(self);

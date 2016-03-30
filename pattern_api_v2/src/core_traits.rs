@@ -45,6 +45,8 @@ pub trait SearchCursors: Sized {
     // Usually a Memory address in form of a raw pointer or usize
     type Cursor: Copy + Eq + Ord;
 
+    type MatchType;
+
     fn into_haystack(self) -> Self::Haystack;
 
     fn offset_from_front(hs: Self::Haystack, begin: Self::Cursor) -> usize;
@@ -53,7 +55,7 @@ pub trait SearchCursors: Sized {
 
     unsafe fn range_to_self(hs: Self::Haystack,
                             start: Self::Cursor,
-                            end: Self::Cursor) -> Self;
+                            end: Self::Cursor) -> Self::MatchType;
 
     fn haystack_len(hs: Self::Haystack) -> usize {
         let haystack = hs;
@@ -68,17 +70,7 @@ pub trait SearchCursors: Sized {
         - Self::offset_from_front(haystack, start)
     }
 
-    fn extract<T, F>(self, mut f: F) -> (Self, T)
-        where F: FnMut(Self::Haystack, Self::Cursor, Self::Cursor) -> T
-    {
-        let h = self.into_haystack();
-        let a = Self::cursor_at_front(h);
-        let b = Self::cursor_at_back(h);
-        unsafe {
-            let t = f(h, a, b);
-            (Self::range_to_self(h, a, b), t)
-        }
-    }
+    fn match_type_len(mt: &Self::MatchType) -> usize;
 }
 
 pub unsafe trait Searcher<H: SearchCursors> {

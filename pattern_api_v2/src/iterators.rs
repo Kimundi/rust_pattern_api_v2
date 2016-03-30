@@ -263,14 +263,14 @@ impl<H, P> MatchesInternal<H, P>
     }
 
     #[inline]
-    fn next(&mut self) -> Option<H> {
+    fn next(&mut self) -> Option<H::MatchType> {
         self.0.next_match().map(|(a, b)| unsafe {
             H::range_to_self(self.0.haystack(), a, b)
         })
     }
 
     #[inline]
-    fn next_back(&mut self) -> Option<H>
+    fn next_back(&mut self) -> Option<H::MatchType>
         where P::Searcher: ReverseSearcher<H>
     {
         self.0.next_match_back().map(|(a, b)| unsafe {
@@ -293,7 +293,7 @@ generate_pattern_iterators! {
     stability:
         //#[stable(feature = "str_matches", since = "1.2.0")]
     internal:
-        MatchesInternal() yielding (H);
+        MatchesInternal() yielding (H::MatchType);
     delegate double ended;
 }
 
@@ -332,7 +332,7 @@ impl<H, P> MatchIndicesInternal<H, P>
     }
 
     #[inline]
-    fn next(&mut self) -> Option<(usize, H)> {
+    fn next(&mut self) -> Option<(usize, H::MatchType)> {
         self.0.next_match().map(|(a, b)| unsafe {
             (H::offset_from_front(self.0.haystack(), a),
              H::range_to_self(self.0.haystack(), a, b))
@@ -340,7 +340,7 @@ impl<H, P> MatchIndicesInternal<H, P>
     }
 
     #[inline]
-    fn next_back(&mut self) -> Option<(usize, H)>
+    fn next_back(&mut self) -> Option<(usize, H::MatchType)>
         where P::Searcher: ReverseSearcher<H>
     {
         self.0.next_match_back().map(|(a, b)| unsafe {
@@ -364,7 +364,7 @@ generate_pattern_iterators! {
     stability:
         //#[stable(feature = "str_match_indices", since = "1.5.0")]
     internal:
-        MatchIndicesInternal() yielding ((usize, H));
+        MatchIndicesInternal() yielding ((usize, H::MatchType));
     delegate double ended;
 }
 
@@ -427,7 +427,7 @@ impl<H, P> SplitInternal<H, P>
     }
 
     #[inline]
-    fn get_end(&mut self) -> Option<H> {
+    fn get_end(&mut self) -> Option<H::MatchType> {
         let h = self.matcher.haystack();
         let diff = |start: H::Cursor, end: H::Cursor| {
             H::cursor_diff(h, start, end)
@@ -446,7 +446,7 @@ impl<H, P> SplitInternal<H, P>
     }
 
     #[inline]
-    fn next(&mut self) -> Option<H> {
+    fn next(&mut self) -> Option<H::MatchType> {
         if self.finished { return None }
 
         match self.matcher.next_match() {
@@ -462,7 +462,7 @@ impl<H, P> SplitInternal<H, P>
     }
 
     #[inline]
-    fn next_back(&mut self) -> Option<H>
+    fn next_back(&mut self) -> Option<H::MatchType>
         where P::Searcher: ReverseSearcher<H>
     {
         if self.finished { return None }
@@ -471,15 +471,12 @@ impl<H, P> SplitInternal<H, P>
             self.allow_trailing_empty = true;
             match self.next_back() {
                 Some(elt) => {
-                    let (elt, len) = elt.extract(|h, a, b| {
-                        H::cursor_diff(h, a, b)
-                    });
-                    if len > 0 {
+                    if H::match_type_len(&elt) > 0 {
                         return Some(elt)
                     } else if self.finished {
                         return None
                     }
-                },
+                }
                 _ => if self.finished { return None }
             }
         }
@@ -516,7 +513,7 @@ generate_pattern_iterators! {
     stability:
         //#[stable(feature = "rust1", since = "1.0.0")]
     internal:
-        SplitInternal() yielding (H);
+        SplitInternal() yielding (H::MatchType);
     delegate double ended;
 }
 
@@ -555,12 +552,12 @@ impl<H, P> SplitTerminatorInternal<H, P>
     }
 
     #[inline]
-    fn next(&mut self) -> Option<H> {
+    fn next(&mut self) -> Option<H::MatchType> {
         self.0.next()
     }
 
     #[inline]
-    fn next_back(&mut self) -> Option<H>
+    fn next_back(&mut self) -> Option<H::MatchType>
         where P::Searcher: ReverseSearcher<H>
     {
         self.0.next_back()
@@ -581,7 +578,7 @@ generate_pattern_iterators! {
     stability:
         //#[stable(feature = "rust1", since = "1.0.0")]
     internal:
-        SplitTerminatorInternal() yielding (H);
+        SplitTerminatorInternal() yielding (H::MatchType);
     delegate double ended;
 }
 
@@ -629,7 +626,7 @@ impl<H, P> SplitNInternal<H, P>
     }
 
     #[inline]
-    fn next(&mut self) -> Option<H> {
+    fn next(&mut self) -> Option<H::MatchType> {
         match self.count {
             0 => None,
             1 => { self.count = 0; self.iter.get_end() }
@@ -638,7 +635,7 @@ impl<H, P> SplitNInternal<H, P>
     }
 
     #[inline]
-    fn next_back(&mut self) -> Option<H>
+    fn next_back(&mut self) -> Option<H::MatchType>
         where P::Searcher: ReverseSearcher<H>
     {
         match self.count {
@@ -663,6 +660,6 @@ generate_pattern_iterators! {
     stability:
         //#[stable(feature = "rust1", since = "1.0.0")]
     internal:
-        SplitNInternal(count: usize) yielding (H);
+        SplitNInternal(count: usize) yielding (H::MatchType);
     delegate single ended;
 }
