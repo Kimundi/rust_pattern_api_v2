@@ -160,3 +160,21 @@ pub trait IteratorConstructors: SearchCursors {
 }
 
 impl<T: SearchCursors> IteratorConstructors for T {}
+
+use os_string::shared::PartialUnicode as OsStrPartialUnicode;
+use os_string::mutable::PartialUnicode as MutOsStrPartialUnicode;
+use std::ffi::OsStr;
+
+pub trait OsStrExtension {
+    fn for_unicode(&self) -> OsStrPartialUnicode;
+    fn for_unicode_mut(&mut self) -> MutOsStrPartialUnicode;
+}
+
+impl OsStrExtension for OsStr {
+    fn for_unicode(&self) -> OsStrPartialUnicode {
+        OsStrPartialUnicode { os_str: self }
+    }
+    fn for_unicode_mut(&mut self) -> MutOsStrPartialUnicode {
+        MutOsStrPartialUnicode { os_str: self }
+    }
+}
