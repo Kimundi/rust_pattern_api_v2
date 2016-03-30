@@ -105,6 +105,8 @@ macro_rules! impl_both_mutability {
                 fn match_type_len(mt: &Self::MatchType) -> usize { mt.len() }
             }
 
+            unsafe impl<'a, T> InverseMatchesAreValid for $slice {}
+
             //////////////////////////////////////////////////////////////////
             // Impl for a ElemEq wrapper
             //////////////////////////////////////////////////////////////////

@@ -60,8 +60,11 @@ macro_rules! generate_pattern_iterators {
         internal:
             $internal_iterator:ident($($iterarg_ident:ident: $iterarg_ty:ty),*) yielding ($iterty:ty);
 
-        // Kind of delgation - either single ended or double ended
-        delegate $($t:tt)*
+        // Additional bounds on the haystack - mostly needed for InverseMatchesAreValid
+        haystack bounds: ($($bound:ident),*);
+
+        // Kind of delegation - either "single" ended or "double" ended
+        delegate $end_kind:ident ended;
     } => {
         $(#[$forward_iterator_attribute])*
         $(#[$common_stability_attribute])*
@@ -72,7 +75,7 @@ macro_rules! generate_pattern_iterators {
         $(#[$common_stability_attribute])*
         impl<H, P> $forward_iterator<H, P>
             where P: Pattern<H>,
-                  H: SearchCursors,
+                  H: SearchCursors $(+ $bound)*,
         {
             #[inline]
             pub fn new(h: H, p: P $(,$iterarg_ident: $iterarg_ty)*) -> Self {
@@ -83,7 +86,7 @@ macro_rules! generate_pattern_iterators {
         $(#[$common_stability_attribute])*
         impl<H, P> fmt::Debug for $forward_iterator<H, P>
             where P: Pattern<H>,
-                  H: SearchCursors,
+                  H: SearchCursors $(+ $bound)*,
                   P::Searcher: fmt::Debug,
         {
             fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -96,7 +99,7 @@ macro_rules! generate_pattern_iterators {
         $(#[$common_stability_attribute])*
         impl<H, P> Iterator for $forward_iterator<H, P>
             where P: Pattern<H>,
-                  H: SearchCursors,
+                  H: SearchCursors $(+ $bound)*,
         {
             type Item = $iterty;
 
@@ -109,7 +112,7 @@ macro_rules! generate_pattern_iterators {
         $(#[$common_stability_attribute])*
         impl<H, P> Clone for $forward_iterator<H, P>
             where P: Pattern<H>,
-                  H: SearchCursors,
+                  H: SearchCursors $(+ $bound)*,
                   P::Searcher: Clone
         {
             fn clone(&self) -> Self {
@@ -121,12 +124,12 @@ macro_rules! generate_pattern_iterators {
         $(#[$common_stability_attribute])*
         pub struct $reverse_iterator<H, P>($internal_iterator<H, P>)
             where P: Pattern<H>,
-                  H: SearchCursors;
+                  H: SearchCursors $(+ $bound)*;
 
         $(#[$common_stability_attribute])*
         impl<H, P> $reverse_iterator<H, P>
             where P: Pattern<H>,
-                  H: SearchCursors,
+                  H: SearchCursors $(+ $bound)*,
         {
             #[inline]
             pub fn new(h: H, p: P $(,$iterarg_ident: $iterarg_ty)*) -> Self {
@@ -137,7 +140,7 @@ macro_rules! generate_pattern_iterators {
         $(#[$common_stability_attribute])*
         impl<H, P> fmt::Debug for $reverse_iterator<H, P>
             where P: Pattern<H>,
-                  H: SearchCursors,
+                  H: SearchCursors $(+ $bound)*,
                   P::Searcher: fmt::Debug
         {
             fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -150,7 +153,7 @@ macro_rules! generate_pattern_iterators {
         $(#[$common_stability_attribute])*
         impl<H, P> Iterator for $reverse_iterator<H, P>
             where P: Pattern<H>,
-                  H: SearchCursors,
+                  H: SearchCursors $(+ $bound)*,
                   P::Searcher: ReverseSearcher<H>
         {
             type Item = $iterty;
@@ -164,7 +167,7 @@ macro_rules! generate_pattern_iterators {
         $(#[$common_stability_attribute])*
         impl<H, P> Clone for $reverse_iterator<H, P>
             where P: Pattern<H>,
-                  H: SearchCursors,
+                  H: SearchCursors $(+ $bound)*,
                   P::Searcher: Clone
         {
             fn clone(&self) -> Self {
@@ -172,19 +175,23 @@ macro_rules! generate_pattern_iterators {
             }
         }
 
-        generate_pattern_iterators!($($t)* with $(#[$common_stability_attribute])*,
-                                                $forward_iterator,
-                                                $reverse_iterator, $iterty);
+        generate_pattern_iterators!(@$end_kind; with $(#[$common_stability_attribute])*,
+                                                       $forward_iterator,
+                                                       $reverse_iterator,
+                                                       $iterty,
+                                                       $($bound),*);
     };
     {
-        double ended; with $(#[$common_stability_attribute:meta])*,
-                           $forward_iterator:ident,
-                           $reverse_iterator:ident, $iterty:ty
+        @double; with $(#[$common_stability_attribute:meta])*,
+                        $forward_iterator:ident,
+                        $reverse_iterator:ident,
+                        $iterty:ty,
+                        $($bound:ident),*
     } => {
         $(#[$common_stability_attribute])*
         impl<H, P> DoubleEndedIterator for $forward_iterator<H, P>
             where P: Pattern<H>,
-                  H: SearchCursors,
+                  H: SearchCursors $(+ $bound)*,
                   P::Searcher: DoubleEndedSearcher<H>
         {
             #[inline]
@@ -196,7 +203,7 @@ macro_rules! generate_pattern_iterators {
         $(#[$common_stability_attribute])*
         impl<H, P: Pattern<H>> DoubleEndedIterator for $reverse_iterator<H, P>
             where P: Pattern<H>,
-                  H: SearchCursors,
+                  H: SearchCursors $(+ $bound)*,
                   P::Searcher: DoubleEndedSearcher<H>
         {
             #[inline]
@@ -206,9 +213,11 @@ macro_rules! generate_pattern_iterators {
         }
     };
     {
-        single ended; with $(#[$common_stability_attribute:meta])*,
-                           $forward_iterator:ident,
-                           $reverse_iterator:ident, $iterty:ty
+        @single; with $(#[$common_stability_attribute:meta])*,
+                        $forward_iterator:ident,
+                        $reverse_iterator:ident,
+                        $iterty:ty,
+                        $($bound:ident),*
     } => {}
 }
 
@@ -294,6 +303,7 @@ generate_pattern_iterators! {
         //#[stable(feature = "str_matches", since = "1.2.0")]
     internal:
         MatchesInternal() yielding (H::MatchType);
+    haystack bounds: ();
     delegate double ended;
 }
 
@@ -365,6 +375,7 @@ generate_pattern_iterators! {
         //#[stable(feature = "str_match_indices", since = "1.5.0")]
     internal:
         MatchIndicesInternal() yielding ((usize, H::MatchType));
+    haystack bounds: ();
     delegate double ended;
 }
 
@@ -514,6 +525,7 @@ generate_pattern_iterators! {
         //#[stable(feature = "rust1", since = "1.0.0")]
     internal:
         SplitInternal() yielding (H::MatchType);
+    haystack bounds: (InverseMatchesAreValid);
     delegate double ended;
 }
 
@@ -579,6 +591,7 @@ generate_pattern_iterators! {
         //#[stable(feature = "rust1", since = "1.0.0")]
     internal:
         SplitTerminatorInternal() yielding (H::MatchType);
+    haystack bounds: (InverseMatchesAreValid);
     delegate double ended;
 }
 
@@ -661,5 +674,6 @@ generate_pattern_iterators! {
         //#[stable(feature = "rust1", since = "1.0.0")]
     internal:
         SplitNInternal(count: usize) yielding (H::MatchType);
+    haystack bounds: (InverseMatchesAreValid);
     delegate single ended;
 }

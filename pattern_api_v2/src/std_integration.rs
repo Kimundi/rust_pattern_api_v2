@@ -4,6 +4,7 @@ use iterators::{SplitTerminator, RSplitTerminator};
 use iterators::{SplitN, RSplitN};
 use iterators::{Matches, RMatches};
 use iterators::{MatchIndices, RMatchIndices};
+use ::InverseMatchesAreValid;
 
 pub trait IteratorConstructors: SearchCursors {
     #[inline]
@@ -12,37 +13,46 @@ pub trait IteratorConstructors: SearchCursors {
     }
 
     #[inline]
-    fn split<P: Pattern<Self>>(self, pat: P) -> Split<Self, P> {
+    fn split<P: Pattern<Self>>(self, pat: P) -> Split<Self, P>
+        where Self: InverseMatchesAreValid
+    {
         Split::new(self, pat)
     }
 
     #[inline]
     fn rsplit<P: Pattern<Self>>(self, pat: P) -> RSplit<Self, P>
-        where P::Searcher: ReverseSearcher<Self>
+        where P::Searcher: ReverseSearcher<Self>,
+              Self: InverseMatchesAreValid
     {
         RSplit::new(self, pat)
     }
 
     #[inline]
-    fn splitn<P: Pattern<Self>>(self, count: usize, pat: P) -> SplitN<Self, P> {
+    fn splitn<P: Pattern<Self>>(self, count: usize, pat: P) -> SplitN<Self, P>
+        where Self: InverseMatchesAreValid
+    {
         SplitN::new(self, pat, count)
     }
 
     #[inline]
     fn rsplitn<P: Pattern<Self>>(self, count: usize, pat: P) -> RSplitN<Self, P>
-        where P::Searcher: ReverseSearcher<Self>
+        where P::Searcher: ReverseSearcher<Self>,
+              Self: InverseMatchesAreValid
     {
         RSplitN::new(self, pat, count)
     }
 
     #[inline]
-    fn split_terminator<P: Pattern<Self>>(self, pat: P) -> SplitTerminator<Self, P> {
+    fn split_terminator<P: Pattern<Self>>(self, pat: P) -> SplitTerminator<Self, P>
+        where Self: InverseMatchesAreValid
+    {
         SplitTerminator::new(self, pat)
     }
 
     #[inline]
     fn rsplit_terminator<P: Pattern<Self>>(self, pat: P) -> RSplitTerminator<Self, P>
-        where P::Searcher: ReverseSearcher<Self>
+        where P::Searcher: ReverseSearcher<Self>,
+              Self: InverseMatchesAreValid
     {
         RSplitTerminator::new(self, pat)
     }

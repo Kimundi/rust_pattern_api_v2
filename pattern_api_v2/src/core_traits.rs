@@ -86,3 +86,5 @@ pub unsafe trait ReverseSearcher<H: SearchCursors>: Searcher<H> {
 }
 
 pub trait DoubleEndedSearcher<H: SearchCursors>: ReverseSearcher<H> {}
+
+pub unsafe trait InverseMatchesAreValid {}
