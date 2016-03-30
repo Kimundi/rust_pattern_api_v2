@@ -4,9 +4,12 @@ extern crate pattern_api_v2;
 
 use pattern_api_v2::slice::Elem;
 use pattern_api_v2::iterators::{Matches, RMatches};
+use pattern_api_v2::os_string::shared::PartialUnicode as UOsStr;
+use pattern_api_v2::os_string::mutable::PartialUnicode as UMutOsStr;
 
 use pattern_api_v2_test_support::{os, s};
 use std::ffi::{OsStr};
+
 
 iterator_cross_test! {
     forward-backward, Matches::new, RMatches::new, {
@@ -31,6 +34,13 @@ iterator_cross_test! {
             [&*os(b"bb"), &*os(b"bb")],
             [&*os(b"bb"), &*os(b"bb")]
 
+        uos_str_str, UOsStr: uos!(b"abbcbbd"), _: "bb",
+            ["bb", "bb"],
+            ["bb", "bb"]
+        uos_str_mut_str, UMutOsStr: muos!(b"abbcbbd"), _: "bb",
+            ["bb", "bb"],
+            ["bb", "bb"]
+
         u8, &[u8]: &{*b"abbcbbd"}, &[_]: b"bb",
             [b"bb", b"bb"],
             [b"bb", b"bb"]
@@ -50,10 +60,16 @@ iterator_cross_test! {
         str_pred,             _: "abcbd",              _: |_| true, ["a", "b", "c", "b", "d"]
         str_mut_char,  &mut str: &mut s("abcbd"),      _: 'b',      ["b", "b"]
         str_mut_pred,  &mut str: &mut s("abcbd"),      _: |_| true, ["a", "b", "c", "b", "d"]
+
         os_char,         &OsStr: &os(b"ab\xbebd"),     _: 'b',      ["b", "b"]
         os_pred,         &OsStr: &os(b"ab\xbebd"),     _: |_| true, ["a", "b", "b", "d"]
         os_mut_char, &mut OsStr: &mut os(b"ab\xbebd"), _: 'b',      ["b", "b"]
         os_mut_pred, &mut OsStr: &mut os(b"ab\xbebd"), _: |_| true, ["a", "b", "b", "d"]
+
+        uos_char,        UOsStr: uos!(b"ab\xbebd"),    _: 'b',      ["b", "b"]
+        uos_pred,        UOsStr: uos!(b"ab\xbebd"),    _: |_| true, ["a", "b", "b", "d"]
+        uos_mut_char, UMutOsStr: muos!(b"ab\xbebd"),   _: 'b',      ["b", "b"]
+        uos_mut_pred, UMutOsStr: muos!(b"ab\xbebd"),   _: |_| true, ["a", "b", "b", "d"]
 
         u8_elem,         &[u8]: b"abcbd",        _: Elem(b'b'),   [b"b", b"b"]
         u8_pred,         &[u8]: b"abcbd",        _: |_: &_| true, [b"a", b"b", b"c", b"b", b"d"]

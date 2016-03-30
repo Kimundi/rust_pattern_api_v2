@@ -4,6 +4,8 @@ extern crate pattern_api_v2;
 
 use pattern_api_v2::slice::Elem;
 use pattern_api_v2::iterators::{MatchIndices, RMatchIndices};
+use pattern_api_v2::os_string::shared::PartialUnicode as UOsStr;
+use pattern_api_v2::os_string::mutable::PartialUnicode as UMutOsStr;
 
 use pattern_api_v2_test_support::{os, s};
 use std::ffi::{OsStr};
@@ -29,6 +31,13 @@ iterator_cross_test! {
         os_str_mut_os, &mut OsStr: &mut os(b"abbcbbd"), _: os!(b"bb"),
             [(1, mos!(b"bb")), (4, mos!(b"bb"))],
             [(1, mos!(b"bb")), (4, mos!(b"bb"))]
+
+        uos_str_str, UOsStr: uos!(b"abbcbbd"), _: "bb",
+            [(1, s!("bb")), (4, s!("bb"))],
+            [(1, s!("bb")), (4, s!("bb"))]
+        uos_str_mut_str, UMutOsStr: muos!(b"abbcbbd"), _: "bb",
+            [(1, ms!("bb")), (4, ms!("bb"))],
+            [(1, ms!("bb")), (4, ms!("bb"))]
 
         u8, &[u8]: sl!(b"abbcbbd"), &[_]: b"bb",
             [(1, sl!(b"bb")), (4, sl!(b"bb"))],

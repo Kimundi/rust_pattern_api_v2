@@ -448,7 +448,9 @@ macro_rules! impl_both_mutability {
             // Wrapper for returning &str matches
             ////////////////////////////////////////////////////////////////////
 
-            pub struct PartialUnicode<'a>($slice);
+            pub struct PartialUnicode<'a> {
+                pub os_str: $slice
+            }
 
             impl<'a> SearchCursors for PartialUnicode<'a> {
                 type Haystack = ($cursor, $cursor);
@@ -456,7 +458,7 @@ macro_rules! impl_both_mutability {
                 type MatchType = $str_slice;
 
                 fn into_haystack(self) -> Self::Haystack {
-                    self.0.into_haystack()
+                    self.os_str.into_haystack()
                 }
 
                 fn offset_from_front(haystack: Self::Haystack,
@@ -498,7 +500,7 @@ macro_rules! impl_both_mutability {
             /// Searches for chars that are equal to a given char
             impl<'a> Pattern<PartialUnicode<'a>> for char {
                 pattern_methods!(CharSearcher<'a>, CharEqPattern, CharSearcher,
-                                 PartialUnicode<'a>, |s: PartialUnicode<'a>| s.0);
+                                 PartialUnicode<'a>, |s: PartialUnicode<'a>| s.os_str);
             }
 
             ////////////////////////////////////////////////////////////////////
@@ -522,7 +524,7 @@ macro_rules! impl_both_mutability {
 
             /// Searches for chars that match the given predicate
             impl<'a, F> Pattern<PartialUnicode<'a>> for F where F: FnMut(char) -> bool {
-                pattern_methods!(CharPredicateSearcher<'a, F>, CharEqPattern, CharPredicateSearcher, PartialUnicode<'a>, |s: PartialUnicode<'a>| s.0);
+                pattern_methods!(CharPredicateSearcher<'a, F>, CharEqPattern, CharPredicateSearcher, PartialUnicode<'a>, |s: PartialUnicode<'a>| s.os_str);
             }
 
             ////////////////////////////////////////////////////////////////////
@@ -538,7 +540,7 @@ macro_rules! impl_both_mutability {
                                 |s: &'b str| OrdSlicePattern(s.as_bytes()),
                                 StrSearcher,
                                 PartialUnicode<'a>,
-                                |s: PartialUnicode<'a>| s.0);
+                                |s: PartialUnicode<'a>| s.os_str);
             }
 
             unsafe impl<'a, 'b> Searcher<PartialUnicode<'a>> for StrSearcher<'a, 'b> {

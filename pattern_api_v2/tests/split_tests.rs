@@ -66,3 +66,25 @@ iterator_cross_test! {
         i32_mut_pred, &mut [i32]: &mut{[1,-2,3,-2,4]}, _: |_: &_| true, [&[], &[], &[], &[], &[], &[]]
     }
 }
+
+#[test]
+fn inverse_match_is_valid() {
+    use pattern_api_v2_test_support::InverseMatchesAreValidIsImplemented;
+    use pattern_api_v2::os_string::shared::PartialUnicode as UOsStr;
+    use pattern_api_v2::os_string::mutable::PartialUnicode as UMutOsStr;
+
+    assert!(<&str>::inverse_match_is_valid());
+    assert!(<&mut str>::inverse_match_is_valid());
+
+    assert!(<&OsStr>::inverse_match_is_valid());
+    assert!(<&mut OsStr>::inverse_match_is_valid());
+
+    assert!(<&[u8]>::inverse_match_is_valid());
+    assert!(<&mut [u8]>::inverse_match_is_valid());
+
+    assert!(<&[i32]>::inverse_match_is_valid());
+    assert!(<&mut [i32]>::inverse_match_is_valid());
+
+    assert!(!<UOsStr>::inverse_match_is_valid());
+    assert!(!<UMutOsStr>::inverse_match_is_valid());
+}

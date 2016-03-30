@@ -5,6 +5,9 @@ extern crate pattern_api_v2 as pattern;
 use pattern::Pattern;
 use pattern::{Searcher, ReverseSearcher};
 use pattern::SearchCursors;
+use pattern::InverseMatchesAreValid;
+pub use pattern::os_string::shared::PartialUnicode as OsStrPartialUnicode;
+pub use pattern::os_string::mutable::PartialUnicode as MutOsStrPartialUnicode;
 
 #[derive(Debug, Eq, PartialEq, Copy, Clone)]
 pub enum SearchResult {
@@ -504,6 +507,16 @@ macro_rules! mos {
 }
 
 #[macro_export]
+macro_rules! uos {
+    ($s:expr) => ($crate::OsStrPartialUnicode{os_str: & *$crate::os($s)})
+}
+
+#[macro_export]
+macro_rules! muos {
+    ($s:expr) => ($crate::MutOsStrPartialUnicode{os_str: &mut *$crate::os($s)})
+}
+
+#[macro_export]
 macro_rules! sl {
     ($s:expr) => (&{*$s}[..]);
     ($s:expr, $($ss:expr),*) => (&[$s, $($ss),*][..]);
@@ -513,4 +526,20 @@ macro_rules! sl {
 macro_rules! msl {
     ($s:expr) => (&mut{*$s}[..]);
     ($s:expr, $($ss:expr),*) => (&mut[$s, $($ss),*][..]);
+}
+
+pub trait InverseMatchesAreValidIsImplemented {
+    fn inverse_match_is_valid() -> bool;
+}
+
+impl<T> InverseMatchesAreValidIsImplemented for T {
+    default fn inverse_match_is_valid() -> bool {
+        false
+    }
+}
+
+impl<T: InverseMatchesAreValid> InverseMatchesAreValidIsImplemented for T {
+    fn inverse_match_is_valid() -> bool {
+        true
+    }
 }
