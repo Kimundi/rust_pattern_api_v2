@@ -405,3 +405,17 @@ impl_both_mutability!(mutable, &'a mut str, *mut u8, u8, |start, end| {
     };
     (begin, end)
 });
+
+use ::Pattern;
+use ::SearchCursors;
+use ::ReverseSearcher;
+
+/*impl<'b, H, P> Pattern<H> for &'b P
+    where P: Pattern<H>,
+          P: Copy,
+          H: SearchCursors,
+{}*/
+
+impl<'a, 'b, 'c> Pattern<&'a str> for &'c &'b str {
+    pattern_methods!(shared::StrSearcher<'a, 'b>, |&s| s, |s| s, &'a str);
+}

@@ -24,6 +24,7 @@ mod macros;
               splitting already returns the same values
     - OsStr iteration! Right now each position is valid, which might be
       wrong for unicode sections in it. eg, split("")
+    - TODO: Generic replace()
 
 */
 
