@@ -21,7 +21,8 @@ macro_rules! impl_both_mutability {
                     $cursor:ty,
                     $cursor_elem:ty,
                     $cursors_to_haystack:expr,
-                    $haystack_to_cursors:expr) => {
+                    $haystack_to_cursors:expr,
+                    $str_slice:ty) => {
         pub mod $module {
             use core_traits::*;
             use std::ffi::OsStr;
@@ -441,6 +442,110 @@ macro_rules! impl_both_mutability {
                 searcher_methods!(reverse, s, s.0, $cursor);
             }
 
+            ////////////////////////////////////////////////////////////////////
+            // Wrapper for returning &str matches
+            ////////////////////////////////////////////////////////////////////
+
+            pub struct PartialUnicode<'a>($slice);
+
+            impl<'a> SearchCursors for PartialUnicode<'a> {
+                type Haystack = ($cursor, $cursor);
+                type Cursor = $cursor;
+                type MatchType = $str_slice;
+
+                fn into_haystack(self) -> Self::Haystack {
+                    self.0.into_haystack()
+                }
+
+                fn offset_from_front(haystack: Self::Haystack,
+                                     begin: Self::Cursor) -> usize {
+                    <$slice>::offset_from_front(haystack, begin)
+                }
+
+                unsafe fn range_to_self(h: Self::Haystack,
+                                        start: Self::Cursor,
+                                        end: Self::Cursor) -> Self::MatchType {
+                    let s = <$slice>::range_to_self(h, start, end);
+
+                    // cast &[mut]OsStr to &[mut]str
+                    mem::transmute::<$slice, $str_slice>(s)
+                }
+                fn cursor_at_front(hs: Self::Haystack) -> Self::Cursor {
+                    <$slice>::cursor_at_front(hs)
+                }
+                fn cursor_at_back(hs: Self::Haystack) -> Self::Cursor {
+                    <$slice>::cursor_at_back(hs)
+                }
+                fn match_type_len(mt: &Self::MatchType) -> usize { mt.len() }
+            }
+
+            ////////////////////////////////////////////////////////////////////
+            // PartialUnicode impl for char
+            ////////////////////////////////////////////////////////////////////
+
+            unsafe impl<'a> Searcher<PartialUnicode<'a>> for CharSearcher<'a> {
+                searcher_methods!(forward, s, s.0, $cursor);
+            }
+
+            unsafe impl<'a> ReverseSearcher<PartialUnicode<'a>> for CharSearcher<'a> {
+                searcher_methods!(reverse, s, s.0, $cursor);
+            }
+
+            impl<'a> DoubleEndedSearcher<PartialUnicode<'a>> for CharSearcher<'a> {}
+
+            /// Searches for chars that are equal to a given char
+            impl<'a> Pattern<PartialUnicode<'a>> for char {
+                pattern_methods!(CharSearcher<'a>, CharEqPattern, CharSearcher,
+                                 PartialUnicode<'a>, |s: PartialUnicode<'a>| s.0);
+            }
+
+            ////////////////////////////////////////////////////////////////////
+            // PartialUnicode impl for FnMut(char) -> bool
+            ////////////////////////////////////////////////////////////////////
+
+            unsafe impl<'a, F> Searcher<PartialUnicode<'a>> for CharPredicateSearcher<'a, F>
+                where F: FnMut(char) -> bool
+            {
+                searcher_methods!(forward, s, s.0, $cursor);
+            }
+
+            unsafe impl<'a, F> ReverseSearcher<PartialUnicode<'a>> for CharPredicateSearcher<'a, F>
+                where F: FnMut(char) -> bool
+            {
+                searcher_methods!(reverse, s, s.0, $cursor);
+            }
+
+            impl<'a, F> DoubleEndedSearcher<PartialUnicode<'a>> for CharPredicateSearcher<'a, F>
+                where F: FnMut(char) -> bool {}
+
+            /// Searches for chars that match the given predicate
+            impl<'a, F> Pattern<PartialUnicode<'a>> for F where F: FnMut(char) -> bool {
+                pattern_methods!(CharPredicateSearcher<'a, F>, CharEqPattern, CharPredicateSearcher, PartialUnicode<'a>, |s: PartialUnicode<'a>| s.0);
+            }
+
+            ////////////////////////////////////////////////////////////////////
+            // PartialUnicode impl for &str
+            ////////////////////////////////////////////////////////////////////
+
+            /// Non-allocating substring search.
+            ///
+            /// Will handle the pattern `""` as returning empty matches at each character
+            /// boundary.
+            impl<'a, 'b> Pattern<PartialUnicode<'a>> for &'b str {
+                pattern_methods!(StrSearcher<'a, 'b>,
+                                |s: &'b str| OrdSlicePattern(s.as_bytes()),
+                                StrSearcher,
+                                PartialUnicode<'a>,
+                                |s: PartialUnicode<'a>| s.0);
+            }
+
+            unsafe impl<'a, 'b> Searcher<PartialUnicode<'a>> for StrSearcher<'a, 'b> {
+                searcher_methods!(forward, s, s.0, $cursor);
+            }
+
+            unsafe impl<'a, 'b> ReverseSearcher<PartialUnicode<'a>> for StrSearcher<'a, 'b> {
+                searcher_methods!(reverse, s, s.0, $cursor);
+            }
         }
     }
 }
@@ -462,7 +567,7 @@ impl_both_mutability!(shared, &'a OsStr, *const u8, u8, |start, end| {
         begin.offset(haystack.len() as isize)
     };
     (begin, end)
-});
+}, &'a str);
 
 impl_both_mutability!(mutable, &'a mut OsStr, *mut u8, u8, |start, end| {
     let slice = ::std::slice::from_raw_parts_mut(start,
@@ -481,4 +586,4 @@ impl_both_mutability!(mutable, &'a mut OsStr, *mut u8, u8, |start, end| {
         begin.offset(haystack.len() as isize)
     };
     (begin, end)
-});
+}, &'a mut str);

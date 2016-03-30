@@ -1,28 +1,31 @@
 
 macro_rules! pattern_methods {
     ($t:ty, $pmap:expr, $smap:expr, $slice:ty) => {
+        pattern_methods!($t, $pmap, $smap, $slice, |s| s);
+    };
+    ($t:ty, $pmap:expr, $smap:expr, $slice:ty, $slice_map:expr) => {
         type Searcher = $t;
 
         #[inline]
         fn into_searcher(self, haystack: $slice) -> $t {
-            ($smap)(($pmap)(self).into_searcher(haystack))
+            ($smap)(($pmap)(self).into_searcher($slice_map(haystack)))
         }
 
         #[inline]
         fn is_contained_in(self, haystack: $slice) -> bool {
-            ($pmap)(self).is_contained_in(haystack)
+            ($pmap)(self).is_contained_in($slice_map(haystack))
         }
 
         #[inline]
         fn is_prefix_of(self, haystack: $slice) -> bool {
-            ($pmap)(self).is_prefix_of(haystack)
+            ($pmap)(self).is_prefix_of($slice_map(haystack))
         }
 
         #[inline]
         fn is_suffix_of(self, haystack: $slice) -> bool
             where $t: ReverseSearcher<$slice>
         {
-            ($pmap)(self).is_suffix_of(haystack)
+            ($pmap)(self).is_suffix_of($slice_map(haystack))
         }
     }
 }
