@@ -6,11 +6,8 @@ use pattern_api_v2::Pattern;
 
 use std::vec::Vec;
 use std::option::Option::{self, Some, None};
-use std::borrow::Cow;
 use std::string::String;
-use std::str::from_utf8;
-use std::result::Result::{self, Ok, Err};
-use std::convert::{AsRef, From};
+use std::convert::From;
 use std::iter::Iterator;
 use std::string::ToString;
 
@@ -84,8 +81,6 @@ fn test_find_str() {
         }
     }
 }
-
-fn s(x: &str) -> String { x.to_string() }
 
 #[test]
 fn test_starts_with() {

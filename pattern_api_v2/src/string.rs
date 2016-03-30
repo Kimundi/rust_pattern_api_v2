@@ -407,8 +407,8 @@ impl_both_mutability!(mutable, &'a mut str, *mut u8, u8, |start, end| {
 });
 
 use ::Pattern;
-use ::SearchCursors;
 use ::ReverseSearcher;
+//use ::SearchCursors;
 
 /*impl<'b, H, P> Pattern<H> for &'b P
     where P: Pattern<H>,
