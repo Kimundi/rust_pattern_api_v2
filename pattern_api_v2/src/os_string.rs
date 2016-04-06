@@ -360,6 +360,31 @@ macro_rules! impl_both_mutability {
                 pattern_methods!(CharPredicateSearcher<'a, F>, CharEqPattern, CharPredicateSearcher, $slice);
             }
 
+            /////////////////////////////////////////////////////////////////////////////
+            // Impl for &[char]
+            /////////////////////////////////////////////////////////////////////////////
+
+            // Todo: Change / Remove due to ambiguity in meaning.
+
+            /// Associated type for `<&[char] as Pattern<&'a str>>::Searcher`.
+            #[derive(Clone)]
+            pub struct CharSliceSearcher<'a, 'b>(CharEqSearcher<'a, &'b [char]>);
+
+            unsafe impl<'a, 'b> Searcher<$slice> for CharSliceSearcher<'a, 'b> {
+                searcher_methods!(forward, s, s.0, $cursor);
+            }
+
+            unsafe impl<'a, 'b> ReverseSearcher<$slice> for CharSliceSearcher<'a, 'b> {
+                searcher_methods!(reverse, s, s.0, $cursor);
+            }
+
+            impl<'a, 'b> DoubleEndedSearcher<$slice> for CharSliceSearcher<'a, 'b> {}
+
+            /// Searches for chars that are equal to any of the chars in the array
+            impl<'a, 'b> Pattern<$slice> for &'b [char] {
+                pattern_methods!(CharSliceSearcher<'a, 'b>, CharEqPattern, CharSliceSearcher, $slice);
+            }
+
             ////////////////////////////////////////////////////////////////////
             // Impl for &OsStr
             ////////////////////////////////////////////////////////////////////
@@ -528,6 +553,26 @@ macro_rules! impl_both_mutability {
             }
 
             ////////////////////////////////////////////////////////////////////
+            // PartialUnicode impl for &[char]
+            ////////////////////////////////////////////////////////////////////
+
+            // Todo: Change / Remove due to ambiguity in meaning.
+
+            unsafe impl<'a, 'b> Searcher<PartialUnicode<'a>> for CharSliceSearcher<'a, 'b> {
+                searcher_methods!(forward, s, s.0, $cursor);
+            }
+
+            unsafe impl<'a, 'b> ReverseSearcher<PartialUnicode<'a>> for CharSliceSearcher<'a, 'b> {
+                searcher_methods!(reverse, s, s.0, $cursor);
+            }
+
+            impl<'a, 'b> DoubleEndedSearcher<PartialUnicode<'a>> for CharSliceSearcher<'a, 'b> {}
+
+            /// Searches for chars that are equal to any of the chars in the array
+            impl<'a, 'b> Pattern<PartialUnicode<'a>> for &'b [char] {
+                pattern_methods!(CharSliceSearcher<'a, 'b>, CharEqPattern, CharSliceSearcher, PartialUnicode<'a>, |s: PartialUnicode<'a>| s.os_str);
+            }
+            ////////////////////////////////////////////////////////////////////
             // PartialUnicode impl for &str
             ////////////////////////////////////////////////////////////////////
 
@@ -591,3 +636,24 @@ impl_both_mutability!(mutable, &'a mut OsStr, *mut u8, u8, |start, end| {
     };
     (begin, end)
 }, &'a mut str);
+
+use ::Pattern;
+use ::ReverseSearcher;
+use std::ffi::OsStr;
+use std::ffi::OsString;
+
+impl<'a, 'b> Pattern<&'a OsStr> for &'b String {
+    pattern_methods!(shared::StrSearcher<'a, 'b>, |s: &'b String| &**s, |s| s, &'a OsStr);
+}
+
+impl<'a, 'b, 'c> Pattern<&'a OsStr> for &'c &'b str {
+    pattern_methods!(shared::StrSearcher<'a, 'b>, |&s| s, |s| s, &'a OsStr);
+}
+
+impl<'a, 'b> Pattern<&'a OsStr> for &'b OsString {
+    pattern_methods!(shared::OsStrSearcher<'a, 'b>, |s: &'b OsString| &**s, |s| s, &'a OsStr);
+}
+
+impl<'a, 'b, 'c> Pattern<&'a OsStr> for &'c &'b OsStr {
+    pattern_methods!(shared::OsStrSearcher<'a, 'b>, |&s| s, |s| s, &'a OsStr);
+}

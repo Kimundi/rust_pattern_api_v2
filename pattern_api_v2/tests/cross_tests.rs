@@ -4,7 +4,6 @@ extern crate pattern_api_v2;
 
 pub use std::ffi::{OsStr, OsString};
 pub use pattern_api_v2::slice::Elem;
-pub use pattern_api_v2_test_support::os;
 
 searcher_cross_test! {
     slice_pattern {
@@ -26,14 +25,14 @@ searcher_cross_test! {
         slice_mut,    &mut [u32]: &mut {[1,2,2,3,2,2,4]},        &[u32]: &[2,2];
         slice2,       &[i32]:     &[-1,-2,-2,-3,-2,-2,-4],       &[i32]: &[-2,-2];
         slice2_mut,   &mut [i32]: &mut {[-1,-2,-2,-3,-2,-2,-4]}, &[i32]: &[-2,-2];
-        os_str,       &OsStr:     &os(b"abb\xffbbd"),            &OsStr: &os(b"bb");
-        os_str_mut,   &mut OsStr: &mut os(b"abb\xffbbd"),        &OsStr: &os(b"bb");
-        os_str2,      &OsStr:     &os(b"abb\xffbbd"),            &str:   "bb";
-        os_str2_mut,  &mut OsStr: &mut os(b"abb\xffbbd"),        &str:   "bb";
-        os_str3,      &OsStr:     &os(b"abb\xbebbd"),            &OsStr: &os(b"bb");
-        os_str3_mut,  &mut OsStr: &mut os(b"abb\xbebbd"),        &OsStr: &os(b"bb");
-        os_str4,      &OsStr:     &os(b"abb\xbebbd"),            &str:   "bb";
-        os_str4_mut,  &mut OsStr: &mut os(b"abb\xbebbd"),        &str:   "bb";
+        os_str,       &OsStr:     os!(b"abb\xffbbd"),            &OsStr: os!(b"bb");
+        os_str_mut,   &mut OsStr: mos!(b"abb\xffbbd"),           &OsStr: os!(b"bb");
+        os_str2,      &OsStr:     os!(b"abb\xffbbd"),            &str:   "bb";
+        os_str2_mut,  &mut OsStr: mos!(b"abb\xffbbd"),           &str:   "bb";
+        os_str3,      &OsStr:     os!(b"abb\xbebbd"),            &OsStr: os!(b"bb");
+        os_str3_mut,  &mut OsStr: mos!(b"abb\xbebbd"),           &OsStr: os!(b"bb");
+        os_str4,      &OsStr:     os!(b"abb\xbebbd"),            &str:   "bb";
+        os_str4_mut,  &mut OsStr: mos!(b"abb\xbebbd"),           &str:   "bb";
     }
 }
 
@@ -68,13 +67,13 @@ searcher_cross_test! {
         slice4,        &[i32]:     &[-1,-2,-3,-2,-4],           _: |e: &_| *e == -2;
         slice4_mut,    &mut [i32]: &mut {[-1,-2,-3,-2,-4]},     _: |e: &_| *e == -2;
 
-        os_str,        &OsStr:     &os(b"ab\xffbd"),            _: 'b';
-        os_str_mut,    &mut OsStr: &mut os(b"ab\xffbd"),        _: 'b';
-        os_str2,       &OsStr:     &os(b"ab\xffbd"),            _: |c| c == 'b';
-        os_str2_mut,   &mut OsStr: &mut os(b"ab\xffbd"),        _: |c| c == 'b';
-        os_str3,       &OsStr:     &os(b"ab\xbebd"),            _: 'b';
-        os_str3_mut,   &mut OsStr: &mut os(b"ab\xbebd"),        _: 'b';
-        os_str4,       &OsStr:     &os(b"ab\xbebd"),            _: |c| c == 'b';
-        os_str4_mut,   &mut OsStr: &mut os(b"ab\xbebd"),        _: |c| c == 'b';
+        os_str,        &OsStr:     os!(b"ab\xffbd"),            _: 'b';
+        os_str_mut,    &mut OsStr: mos!(b"ab\xffbd"),        _: 'b';
+        os_str2,       &OsStr:     os!(b"ab\xffbd"),            _: |c| c == 'b';
+        os_str2_mut,   &mut OsStr: mos!(b"ab\xffbd"),        _: |c| c == 'b';
+        os_str3,       &OsStr:     os!(b"ab\xbebd"),            _: 'b';
+        os_str3_mut,   &mut OsStr: mos!(b"ab\xbebd"),        _: 'b';
+        os_str4,       &OsStr:     os!(b"ab\xbebd"),            _: |c| c == 'b';
+        os_str4_mut,   &mut OsStr: mos!(b"ab\xbebd"),        _: |c| c == 'b';
     }
 }

@@ -440,11 +440,24 @@ pub use std::ffi::{OsStr, OsString};
 use std::ops::{Deref, DerefMut};
 use std::mem;
 
-pub fn os(s: &[u8]) -> OsStrBuf {
-    let s = unsafe {
-        mem::transmute::<&[u8], &str>(s)
-    };
-    OsStrBuf(s.into())
+pub trait OsConvert {
+    fn new(self) -> OsStrBuf;
+}
+impl<'a> OsConvert for &'a str {
+    fn new(self) -> OsStrBuf {
+        OsStrBuf(self.into())
+    }
+}
+impl<'a> OsConvert for &'a [u8] {
+    fn new(self) -> OsStrBuf {
+        let s = unsafe {
+            mem::transmute::<&[u8], &str>(self)
+        };
+        OsStrBuf(s.into())
+    }
+}
+pub fn _os<T: OsConvert>(s: T) -> OsStrBuf {
+    s.new()
 }
 
 pub struct OsStrBuf(OsString);
@@ -498,22 +511,22 @@ macro_rules! ms {
 
 #[macro_export]
 macro_rules! os {
-    ($s:expr) => (& *$crate::os($s))
+    ($s:expr) => (& *$crate::_os(&$s[..]))
 }
 
 #[macro_export]
 macro_rules! mos {
-    ($s:expr) => (&mut *$crate::os($s))
+    ($s:expr) => (&mut *$crate::_os(&$s[..]))
 }
 
 #[macro_export]
 macro_rules! uos {
-    ($s:expr) => ($crate::OsStrPartialUnicode{os_str: & *$crate::os($s)})
+    ($s:expr) => ($crate::OsStrPartialUnicode{os_str: & *$crate::_os(&$s[..])})
 }
 
 #[macro_export]
 macro_rules! muos {
-    ($s:expr) => ($crate::MutOsStrPartialUnicode{os_str: &mut *$crate::os($s)})
+    ($s:expr) => ($crate::MutOsStrPartialUnicode{os_str: &mut *$crate::_os(&$s[..])})
 }
 
 #[macro_export]

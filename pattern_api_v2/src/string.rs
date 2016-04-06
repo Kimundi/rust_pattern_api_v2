@@ -420,6 +420,10 @@ use ::ReverseSearcher;
           H: SearchCursors,
 {}*/
 
+impl<'a, 'b> Pattern<&'a str> for &'b String {
+    pattern_methods!(shared::StrSearcher<'a, 'b>, |s: &'b String| &**s, |s| s, &'a str);
+}
+
 impl<'a, 'b, 'c> Pattern<&'a str> for &'c &'b str {
     pattern_methods!(shared::StrSearcher<'a, 'b>, |&s| s, |s| s, &'a str);
 }

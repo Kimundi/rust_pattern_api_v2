@@ -164,10 +164,24 @@ impl<T: SearchCursors> IteratorConstructors for T {}
 use os_string::shared::PartialUnicode as OsStrPartialUnicode;
 use os_string::mutable::PartialUnicode as MutOsStrPartialUnicode;
 use std::ffi::OsStr;
+use std::ffi::OsString;
+use std::char;
+use std::os::unix::ffi::OsStrExt;
 
 pub trait OsStrExtension {
     fn for_unicode(&self) -> OsStrPartialUnicode;
     fn for_unicode_mut(&mut self) -> MutOsStrPartialUnicode;
+
+    fn starts_with_os<S: AsRef<OsStr>>(&self, s: S) -> bool;
+    fn ends_with_os<S: AsRef<OsStr>>(&self, s: S) -> bool;
+    fn contains_os<S: AsRef<OsStr>>(&self, s: S) -> bool;
+}
+
+pub trait OsStringExtension {
+    fn from_wide(s: &[u16]) -> Self;
+    fn push_str(&mut self, &str);
+    fn push_os_str(&mut self, &OsStr);
+    fn push_codepoint(&mut self, u32);
 }
 
 impl OsStrExtension for OsStr {
@@ -176,5 +190,52 @@ impl OsStrExtension for OsStr {
     }
     fn for_unicode_mut(&mut self) -> MutOsStrPartialUnicode {
         MutOsStrPartialUnicode { os_str: self }
+    }
+    fn starts_with_os<S: AsRef<OsStr>>(&self, s: S) -> bool {
+        self.starts_with(s.as_ref())
+    }
+    fn ends_with_os<S: AsRef<OsStr>>(&self, s: S) -> bool {
+        self.ends_with(s.as_ref())
+    }
+    fn contains_os<S: AsRef<OsStr>>(&self, s: S) -> bool {
+        self.contains(s.as_ref())
+    }
+}
+
+impl OsStringExtension for OsString {
+    fn from_wide(v: &[u16]) -> OsString {
+        let mut string = OsString::with_capacity(v.len());
+        for item in char::decode_utf16(v.iter().cloned()) {
+            match item {
+                Ok(ch) => {
+                    string.push_codepoint(ch as u32);
+                }
+                Err(surrogate) => {
+                    string.push_codepoint(surrogate as u32);
+                }
+            }
+        }
+        string
+    }
+    fn push_str(&mut self, s: &str) {
+        unsafe {
+            ::std::mem::transmute::<&mut OsString, &mut Vec<u8>>(self)
+                .extend(s.bytes());
+        }
+    }
+    fn push_os_str(&mut self, s: &OsStr) {
+        unsafe {
+            ::std::mem::transmute::<&mut OsString, &mut Vec<u8>>(self)
+                .extend(s.as_bytes().iter().clone());
+        }
+    }
+    fn push_codepoint(&mut self, cp: u32) {
+        unsafe {
+            let ch = char::from_u32_unchecked(cp as u32);
+            for byte in ch.encode_utf8() {
+                ::std::mem::transmute::<&mut OsString, &mut Vec<u8>>(self)
+                    .push(byte);
+            }
+        }
     }
 }

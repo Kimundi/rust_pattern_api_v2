@@ -7,7 +7,7 @@ use pattern_api_v2::iterators::{MatchIndices, RMatchIndices};
 use pattern_api_v2::os_string::shared::PartialUnicode as UOsStr;
 use pattern_api_v2::os_string::mutable::PartialUnicode as UMutOsStr;
 
-use pattern_api_v2_test_support::{os, s};
+use pattern_api_v2_test_support::{s};
 use std::ffi::{OsStr};
 
 iterator_cross_test! {
@@ -19,16 +19,16 @@ iterator_cross_test! {
             [(1, ms!("bb")), (4, ms!("bb"))],
             [(1, ms!("bb")), (4, ms!("bb"))]
 
-        os_str_str, &OsStr: &os(b"abbcbbd"), _: "bb",
+        os_str_str, &OsStr: os!("abbcbbd"), _: "bb",
             [(1, os!(b"bb")), (4, os!(b"bb"))],
             [(1, os!(b"bb")), (4, os!(b"bb"))]
-        os_str_mut_str, &mut OsStr: &mut os(b"abbcbbd"), _: "bb",
+        os_str_mut_str, &mut OsStr: mos!("abbcbbd"), _: "bb",
             [(1, mos!(b"bb")), (4, mos!(b"bb"))],
             [(1, mos!(b"bb")), (4, mos!(b"bb"))]
-        os_str_os, &OsStr: &os(b"abbcbbd"), _: os!(b"bb"),
+        os_str_os, &OsStr: os!("abbcbbd"), _: os!(b"bb"),
             [(1, os!(b"bb")), (4, os!(b"bb"))],
             [(1, os!(b"bb")), (4, os!(b"bb"))]
-        os_str_mut_os, &mut OsStr: &mut os(b"abbcbbd"), _: os!(b"bb"),
+        os_str_mut_os, &mut OsStr: mos!("abbcbbd"), _: os!(b"bb"),
             [(1, mos!(b"bb")), (4, mos!(b"bb"))],
             [(1, mos!(b"bb")), (4, mos!(b"bb"))]
 
@@ -62,13 +62,13 @@ iterator_cross_test! {
         str_mut_pred, &mut str: &mut s("abcbd"), _: |_| true,
             [(0, ms!("a")), (1, ms!("b")), (2, ms!("c")), (3, ms!("b")), (4, ms!("d"))]
 
-        os_char, &OsStr: &os(b"ab\xbebd"), _: 'b',
+        os_char, &OsStr: os!(b"ab\xbebd"), _: 'b',
             [(1, os!(b"b")), (3, os!(b"b"))]
-        os_pred, &OsStr: &os(b"ab\xbebd"), _: |_| true,
+        os_pred, &OsStr: os!(b"ab\xbebd"), _: |_| true,
             [(0, os!(b"a")), (1, os!(b"b")), (3, os!(b"b")), (4, os!(b"d"))]
-        os_mut_char, &mut OsStr: &mut os(b"ab\xbebd"), _: 'b',
+        os_mut_char, &mut OsStr: mos!(b"ab\xbebd"), _: 'b',
             [(1, mos!(b"b")), (3, mos!(b"b"))]
-        os_mut_pred, &mut OsStr: &mut os(b"ab\xbebd"), _: |_| true,
+        os_mut_pred, &mut OsStr: mos!(b"ab\xbebd"), _: |_| true,
             [(0, mos!(b"a")), (1, mos!(b"b")), (3, mos!(b"b")), (4, mos!(b"d"))]
 
         u8_elem, &[u8]: b"abcbd", _: Elem(b'b'),

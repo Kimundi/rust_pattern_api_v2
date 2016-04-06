@@ -2,6 +2,8 @@
 #![feature(specialization)]
 #![feature(associated_type_defaults)]
 #![feature(osstring_simple_functions)]
+#![feature(decode_utf16)]
+#![feature(unicode)]
 
 #[macro_use]
 mod macros;
