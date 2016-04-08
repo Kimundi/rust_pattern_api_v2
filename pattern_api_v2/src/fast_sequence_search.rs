@@ -3,7 +3,7 @@ use super::*;
 use std::cmp;
 use std::usize;
 
-pub trait OrdSlice: SearchCursors {
+pub trait OrdSlice: PatternHaystack {
     type NeedleElement: Ord;
     type FastSkipOptimization: FastSkipOptimization<Self::NeedleElement>;
 
@@ -81,14 +81,14 @@ impl<'b, H: OrdSlice> OrdSlicePattern<'b, H> {
 }
 
 #[derive(Copy, Clone)]
-pub struct Iter<H: SearchCursors> {
+pub struct Iter<H: PatternHaystack> {
     haystack: H::Haystack,
     start: H::Cursor,
     end: H::Cursor,
     _marker: ::std::marker::PhantomData<H>,
 }
 
-impl<H: SearchCursors> Iter<H> {
+impl<H: PatternHaystack> Iter<H> {
     #[inline]
     fn new(haystack: H::Haystack) -> Self {
         let start = H::cursor_at_front(haystack);
@@ -249,7 +249,7 @@ impl<'b, H: OrdSlice> OrdSeqSearcher<'b, H> {
 }
 
 unsafe impl<'b, H: OrdSlice> Searcher<H> for OrdSeqSearcher<'b, H>
-    where H: SearchCursors
+    where H: PatternHaystack
 {
     fn haystack(&self) -> H::Haystack {
         self.iter.haystack
@@ -305,7 +305,7 @@ unsafe impl<'b, H: OrdSlice> Searcher<H> for OrdSeqSearcher<'b, H>
 }
 
 unsafe impl<'b, H: OrdSlice> ReverseSearcher<H> for OrdSeqSearcher<'b, H>
-    where H: SearchCursors
+    where H: PatternHaystack
 {
     #[inline]
     fn next_match_back(&mut self) -> Option<(H::Cursor, H::Cursor)> {

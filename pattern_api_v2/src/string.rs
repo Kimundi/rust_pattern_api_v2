@@ -52,7 +52,7 @@ macro_rules! impl_both_mutability {
                 }
             }
 
-            impl<'a> SearchCursors for $slice {
+            impl<'a> PatternHaystack for $slice {
                 type Haystack = ($cursor, $cursor);
                 type Cursor = $cursor;
                 type MatchType = $slice;
@@ -412,12 +412,12 @@ impl_both_mutability!(mutable, &'a mut str, *mut u8, u8, |start, end| {
 
 use ::Pattern;
 use ::ReverseSearcher;
-//use ::SearchCursors;
+//use ::PatternHaystack;
 
 /*impl<'b, H, P> Pattern<H> for &'b P
     where P: Pattern<H>,
           P: Copy,
-          H: SearchCursors,
+          H: PatternHaystack,
 {}*/
 
 impl<'a, 'b> Pattern<&'a str> for &'b String {

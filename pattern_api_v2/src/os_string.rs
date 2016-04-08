@@ -121,7 +121,7 @@ macro_rules! impl_both_mutability {
                 }
             }
 
-            impl<'a> SearchCursors for $slice {
+            impl<'a> PatternHaystack for $slice {
                 type Haystack = ($cursor, $cursor);
                 type Cursor = $cursor;
                 type MatchType = $slice;
@@ -507,7 +507,7 @@ macro_rules! impl_both_mutability {
                 pub os_str: $slice
             }
 
-            impl<'a> SearchCursors for PartialUnicode<'a> {
+            impl<'a> PatternHaystack for PartialUnicode<'a> {
                 type Haystack = ($cursor, $cursor);
                 type Cursor = $cursor;
                 type MatchType = $str_slice;

@@ -1,4 +1,4 @@
-use ::{Pattern, SearchCursors, Searcher, ReverseSearcher, DoubleEndedSearcher};
+use ::{Pattern, PatternHaystack, Searcher, ReverseSearcher, DoubleEndedSearcher};
 use iterators::{Split, RSplit};
 use iterators::{SplitTerminator, RSplitTerminator};
 use iterators::{SplitN, RSplitN};
@@ -6,7 +6,7 @@ use iterators::{Matches, RMatches};
 use iterators::{MatchIndices, RMatchIndices};
 use ::InverseMatchesAreValid;
 
-pub trait IteratorConstructors: SearchCursors {
+pub trait IteratorConstructors: PatternHaystack {
     #[inline]
     fn contains<P: Pattern<Self>>(self, pat: P) -> bool {
         pat.is_contained_in(self)
@@ -159,7 +159,7 @@ pub trait IteratorConstructors: SearchCursors {
     }
 }
 
-impl<T: SearchCursors> IteratorConstructors for T {}
+impl<T: PatternHaystack> IteratorConstructors for T {}
 
 use os_string::shared::PartialUnicode as OsStrPartialUnicode;
 use os_string::mutable::PartialUnicode as MutOsStrPartialUnicode;

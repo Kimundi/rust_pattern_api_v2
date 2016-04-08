@@ -77,7 +77,7 @@ macro_rules! impl_both_mutability {
                 }
             }
 
-            impl<'a, T> SearchCursors for $slice {
+            impl<'a, T> PatternHaystack for $slice {
                 type Haystack = ($cursor, $cursor);
                 type Cursor = $cursor;
                 type MatchType = $slice;

@@ -70,12 +70,12 @@ macro_rules! generate_pattern_iterators {
         $(#[$common_stability_attribute])*
         pub struct $forward_iterator<H, P>($internal_iterator<H, P>)
             where P: Pattern<H>,
-                  H: SearchCursors;
+                  H: PatternHaystack;
 
         $(#[$common_stability_attribute])*
         impl<H, P> $forward_iterator<H, P>
             where P: Pattern<H>,
-                  H: SearchCursors $(+ $bound)*,
+                  H: PatternHaystack $(+ $bound)*,
         {
             #[inline]
             pub fn new(h: H, p: P $(,$iterarg_ident: $iterarg_ty)*) -> Self {
@@ -86,7 +86,7 @@ macro_rules! generate_pattern_iterators {
         $(#[$common_stability_attribute])*
         impl<H, P> fmt::Debug for $forward_iterator<H, P>
             where P: Pattern<H>,
-                  H: SearchCursors $(+ $bound)*,
+                  H: PatternHaystack $(+ $bound)*,
                   P::Searcher: fmt::Debug,
         {
             fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -99,7 +99,7 @@ macro_rules! generate_pattern_iterators {
         $(#[$common_stability_attribute])*
         impl<H, P> Iterator for $forward_iterator<H, P>
             where P: Pattern<H>,
-                  H: SearchCursors $(+ $bound)*,
+                  H: PatternHaystack $(+ $bound)*,
         {
             type Item = $iterty;
 
@@ -112,7 +112,7 @@ macro_rules! generate_pattern_iterators {
         $(#[$common_stability_attribute])*
         impl<H, P> Clone for $forward_iterator<H, P>
             where P: Pattern<H>,
-                  H: SearchCursors $(+ $bound)*,
+                  H: PatternHaystack $(+ $bound)*,
                   P::Searcher: Clone
         {
             fn clone(&self) -> Self {
@@ -124,12 +124,12 @@ macro_rules! generate_pattern_iterators {
         $(#[$common_stability_attribute])*
         pub struct $reverse_iterator<H, P>($internal_iterator<H, P>)
             where P: Pattern<H>,
-                  H: SearchCursors $(+ $bound)*;
+                  H: PatternHaystack $(+ $bound)*;
 
         $(#[$common_stability_attribute])*
         impl<H, P> $reverse_iterator<H, P>
             where P: Pattern<H>,
-                  H: SearchCursors $(+ $bound)*,
+                  H: PatternHaystack $(+ $bound)*,
         {
             #[inline]
             pub fn new(h: H, p: P $(,$iterarg_ident: $iterarg_ty)*) -> Self {
@@ -140,7 +140,7 @@ macro_rules! generate_pattern_iterators {
         $(#[$common_stability_attribute])*
         impl<H, P> fmt::Debug for $reverse_iterator<H, P>
             where P: Pattern<H>,
-                  H: SearchCursors $(+ $bound)*,
+                  H: PatternHaystack $(+ $bound)*,
                   P::Searcher: fmt::Debug
         {
             fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -153,7 +153,7 @@ macro_rules! generate_pattern_iterators {
         $(#[$common_stability_attribute])*
         impl<H, P> Iterator for $reverse_iterator<H, P>
             where P: Pattern<H>,
-                  H: SearchCursors $(+ $bound)*,
+                  H: PatternHaystack $(+ $bound)*,
                   P::Searcher: ReverseSearcher<H>
         {
             type Item = $iterty;
@@ -167,7 +167,7 @@ macro_rules! generate_pattern_iterators {
         $(#[$common_stability_attribute])*
         impl<H, P> Clone for $reverse_iterator<H, P>
             where P: Pattern<H>,
-                  H: SearchCursors $(+ $bound)*,
+                  H: PatternHaystack $(+ $bound)*,
                   P::Searcher: Clone
         {
             fn clone(&self) -> Self {
@@ -191,7 +191,7 @@ macro_rules! generate_pattern_iterators {
         $(#[$common_stability_attribute])*
         impl<H, P> DoubleEndedIterator for $forward_iterator<H, P>
             where P: Pattern<H>,
-                  H: SearchCursors $(+ $bound)*,
+                  H: PatternHaystack $(+ $bound)*,
                   P::Searcher: DoubleEndedSearcher<H>
         {
             #[inline]
@@ -203,7 +203,7 @@ macro_rules! generate_pattern_iterators {
         $(#[$common_stability_attribute])*
         impl<H, P: Pattern<H>> DoubleEndedIterator for $reverse_iterator<H, P>
             where P: Pattern<H>,
-                  H: SearchCursors $(+ $bound)*,
+                  H: PatternHaystack $(+ $bound)*,
                   P::Searcher: DoubleEndedSearcher<H>
         {
             #[inline]
@@ -227,7 +227,7 @@ macro_rules! derive_pattern_clone {
     (clone $t:ident with |$s:ident| $e:expr) => {
         impl<H, P: Pattern<H>> Clone for $t<H, P>
             where P::Searcher: Clone,
-                  H: SearchCursors,
+                  H: PatternHaystack,
         {
             fn clone(&self) -> Self {
                 let $s = self;
@@ -248,12 +248,12 @@ derive_pattern_clone!{
 
 struct MatchesInternal<H, P>(P::Searcher)
     where P: Pattern<H>,
-          H: SearchCursors;
+          H: PatternHaystack;
 
 impl<H, P> fmt::Debug for MatchesInternal<H, P>
     where P: Pattern<H>,
           P::Searcher: fmt::Debug,
-          H: SearchCursors,
+          H: PatternHaystack,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.debug_tuple("MatchesInternal")
@@ -264,7 +264,7 @@ impl<H, P> fmt::Debug for MatchesInternal<H, P>
 
 impl<H, P> MatchesInternal<H, P>
     where P: Pattern<H>,
-          H: SearchCursors,
+          H: PatternHaystack,
 {
     #[inline]
     fn new(h: H, p: P) -> Self {
@@ -318,12 +318,12 @@ derive_pattern_clone!{
 
 struct MatchIndicesInternal<H, P>(P::Searcher)
     where P: Pattern<H>,
-          H: SearchCursors;
+          H: PatternHaystack;
 
 impl<H, P: Pattern<H>> fmt::Debug for MatchIndicesInternal<H, P>
     where P::Searcher: fmt::Debug,
           P: Pattern<H>,
-          H: SearchCursors
+          H: PatternHaystack
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.debug_tuple("MatchIndicesInternal")
@@ -334,7 +334,7 @@ impl<H, P: Pattern<H>> fmt::Debug for MatchIndicesInternal<H, P>
 
 impl<H, P> MatchIndicesInternal<H, P>
     where P: Pattern<H>,
-          H: SearchCursors,
+          H: PatternHaystack,
 {
     #[inline]
     fn new(h: H, p: P) -> Self {
@@ -390,7 +390,7 @@ derive_pattern_clone!{
 
 struct SplitInternal<H, P>
     where P: Pattern<H>,
-          H: SearchCursors,
+          H: PatternHaystack,
 {
     start: H::Cursor,
     end: H::Cursor,
@@ -402,7 +402,7 @@ struct SplitInternal<H, P>
 impl<H, P> fmt::Debug for SplitInternal<H, P>
     where P::Searcher: fmt::Debug,
           P: Pattern<H>,
-          H: SearchCursors,
+          H: PatternHaystack,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.debug_struct("SplitInternal")
@@ -420,7 +420,7 @@ impl<H, P> fmt::Debug for SplitInternal<H, P>
 
 impl<H, P> SplitInternal<H, P>
     where P: Pattern<H>,
-          H: SearchCursors,
+          H: PatternHaystack,
 {
     #[inline]
     fn new(h: H, p: P) -> Self {
@@ -540,12 +540,12 @@ derive_pattern_clone!{
 
 struct SplitTerminatorInternal<H, P>(SplitInternal<H, P>)
     where P: Pattern<H>,
-          H: SearchCursors;
+          H: PatternHaystack;
 
 impl<H, P> fmt::Debug for SplitTerminatorInternal<H, P>
     where P::Searcher: fmt::Debug,
           P: Pattern<H>,
-          H: SearchCursors,
+          H: PatternHaystack,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         self.0.fmt(f)
@@ -554,7 +554,7 @@ impl<H, P> fmt::Debug for SplitTerminatorInternal<H, P>
 
 impl<H, P> SplitTerminatorInternal<H, P>
     where P: Pattern<H>,
-          H: SearchCursors,
+          H: PatternHaystack,
 {
     #[inline]
     fn new(h: H, p: P) -> Self {
@@ -606,7 +606,7 @@ derive_pattern_clone!{
 
 struct SplitNInternal<H, P>
     where P: Pattern<H>,
-          H: SearchCursors,
+          H: PatternHaystack,
 {
     iter: SplitInternal<H, P>,
     /// The number of splits remaining
@@ -615,7 +615,7 @@ struct SplitNInternal<H, P>
 
 impl<H, P> fmt::Debug for SplitNInternal<H, P>
     where P: Pattern<H>,
-          H: SearchCursors,
+          H: PatternHaystack,
           P::Searcher: fmt::Debug
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -628,7 +628,7 @@ impl<H, P> fmt::Debug for SplitNInternal<H, P>
 
 impl<H, P> SplitNInternal<H, P>
     where P: Pattern<H>,
-          H: SearchCursors,
+          H: PatternHaystack,
 {
     #[inline]
     fn new(h: H, p: P, count: usize) -> Self {

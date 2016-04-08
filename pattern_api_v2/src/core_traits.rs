@@ -1,4 +1,4 @@
-pub trait Pattern<H: SearchCursors>: Sized {
+pub trait Pattern<H: PatternHaystack>: Sized {
     type Searcher: Searcher<H>;
     fn into_searcher(self, haystack: H) -> Self::Searcher;
 
@@ -33,7 +33,7 @@ pub trait Pattern<H: SearchCursors>: Sized {
 // for dealing with positions in a slice-like type
 // with pointer-like cursors
 // Logically, Haystack <= Cursor <= Back
-pub trait SearchCursors: Sized {
+pub trait PatternHaystack: Sized {
     // For storing the bounds of the haystack.
     // Usually a combination of Memory address in form of a raw pointer or usize
     type Haystack: Copy;
@@ -73,18 +73,18 @@ pub trait SearchCursors: Sized {
     fn match_type_len(mt: &Self::MatchType) -> usize;
 }
 
-pub unsafe trait Searcher<H: SearchCursors> {
+pub unsafe trait Searcher<H: PatternHaystack> {
     fn haystack(&self) -> H::Haystack;
 
     fn next_match(&mut self) -> Option<(H::Cursor, H::Cursor)>;
     fn next_reject(&mut self) -> Option<(H::Cursor, H::Cursor)>;
 }
 
-pub unsafe trait ReverseSearcher<H: SearchCursors>: Searcher<H> {
+pub unsafe trait ReverseSearcher<H: PatternHaystack>: Searcher<H> {
     fn next_match_back(&mut self) -> Option<(H::Cursor, H::Cursor)>;
     fn next_reject_back(&mut self) -> Option<(H::Cursor, H::Cursor)>;
 }
 
-pub trait DoubleEndedSearcher<H: SearchCursors>: ReverseSearcher<H> {}
+pub trait DoubleEndedSearcher<H: PatternHaystack>: ReverseSearcher<H> {}
 
 pub unsafe trait InverseMatchesAreValid {}

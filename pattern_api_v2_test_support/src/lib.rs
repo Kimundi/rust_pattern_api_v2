@@ -4,7 +4,7 @@ extern crate pattern_api_v2 as pattern;
 
 use pattern::Pattern;
 use pattern::{Searcher, ReverseSearcher};
-use pattern::SearchCursors;
+use pattern::PatternHaystack;
 use pattern::InverseMatchesAreValid;
 pub use pattern::os_string::shared::PartialUnicode as OsStrPartialUnicode;
 pub use pattern::os_string::mutable::PartialUnicode as MutOsStrPartialUnicode;
@@ -34,7 +34,7 @@ pub fn cmp_search_to_vec<'a, H, P, F, HF>(rev: bool,
                                           mut pat: F,
                                           mut haystack: HF,
                                           right: Option<Vec<SearchResult>>) -> Vec<SearchResult>
-where H: SearchCursors,
+where H: PatternHaystack,
       P: Pattern<H>,
       P::Searcher: ReverseSearcher<H>,
       F: FnMut() -> P,
@@ -150,7 +150,7 @@ pub struct Callback {
 }
 impl Callback {
     pub fn call<H, P>(&mut self, haystack: H, pattern: P)
-        where H: SearchCursors,
+        where H: PatternHaystack,
               P: Pattern<H>,
               P::Searcher: ReverseSearcher<H>,
     {

@@ -571,7 +571,7 @@ generate_iterator_test! {
 
 #[test]
 fn different_str_pattern_forwarding_lifetimes() {
-    use pattern_api_v2::{SearchCursors, Searcher};
+    use pattern_api_v2::{PatternHaystack, Searcher};
 
     trait RealFind {
         fn real_find<'a, P: Pattern<&'a str>>(&'a self, pat: P) -> Option<usize>;
