@@ -688,6 +688,7 @@ impl<'a, 'b, 'c> Pattern<&'a OsStr> for &'c &'b OsStr {
     pattern_methods!(shared::OsStrSearcher<'a, 'b>, |&s| s, |s| s, &'a OsStr);
 }
 
+#[cfg(any(test, not(unix)))]
 fn starts_with_surrogate(v: &[u8]) -> Option<u16> {
     let mut iter = v.iter().cloned();
     use utf8::next_code_point;
@@ -704,6 +705,7 @@ fn starts_with_surrogate(v: &[u8]) -> Option<u16> {
     }
 }
 
+#[cfg(any(test, not(unix)))]
 fn ends_with_surrogate(v: &[u8]) -> Option<u16> {
     if v.len() >= 3 {
         starts_with_surrogate(&v[v.len() - 3..])
@@ -712,6 +714,7 @@ fn ends_with_surrogate(v: &[u8]) -> Option<u16> {
     }
 }
 
+#[cfg(any(test, not(unix)))]
 fn split_loony_surrogates(s: &OsStr) -> (&[u8], &[u8], &[u8]) {
     let s = unsafe {
         ::std::mem::transmute::<&OsStr, &[u8]>(s)
