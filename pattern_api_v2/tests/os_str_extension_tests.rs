@@ -41,9 +41,7 @@ fn split_char() -> (OsString, OsString) {
 }
 
 fn from_cp(cp: u16) -> OsString {
-    let mut x = OsString::new();
-    x.push_codepoint(cp as u32);
-    x
+    OsString::from_wide(&[cp])
 }
 
 #[test]
@@ -360,15 +358,29 @@ fn wtf8_starts_with() {
     assert!(os!("").starts_with(os!("")));
     assert!(!os!("").starts_with(os!("a")));
 
-    fn check_surrogates(prefix: &OsStr) {
+    fn check_surrogates(prefix: &[u16]) {
         let mut lead = prefix.to_owned();
-        lead.push_os_str(&from_cp(0xD83D)[..]);
+        lead.push(0xD83D);
+
+            let mut full = lead.clone();
+            full.push(0xDE3A);
+            let full = OsString::from_wide(&full);
+
+        let lead = OsString::from_wide(&lead);
+
         let mut other_lead = prefix.to_owned();
-        other_lead.push_os_str(&from_cp(0xD83E)[..]);
-        let trail = from_cp(0xDE3A);
-        let mut full = lead.clone();
-        full.push_os_str(&trail);
-        assert_eq!(full, { let mut x = prefix.to_owned(); x.push_str("😺"); x });
+        other_lead.push(0xD83E);
+        let other_lead = OsString::from_wide(&other_lead);
+
+        let trail = OsString::from_wide(&[0xDE3A]);
+
+        let prefix = &OsString::from_wide(prefix);
+
+        assert_eq!(full, {
+            let mut x = prefix.to_owned();
+            x.push_str("😺");
+            x
+        });
 
         assert!(full.starts_with(&full));
         assert!(lead.starts_with(&lead));
@@ -380,9 +392,9 @@ fn wtf8_starts_with() {
         assert!(!lead.starts_with(&full));
     }
 
-    check_surrogates(os!(""));
-    check_surrogates(os!("a"));
-    check_surrogates(&from_cp(0xD83D)[..]);
+    check_surrogates(&[]);
+    check_surrogates(&[b'a' as u16]);
+    check_surrogates(&[0xD83D]);
 }
 
 #[test]
@@ -394,15 +406,23 @@ fn wtf8_ends_with() {
     assert!(os!("").ends_with(os!("")));
     assert!(!os!("").ends_with(os!("a")));
 
-    fn check_surrogates(suffix: &OsStr) {
-        let lead = from_cp(0xD83D);
-        let mut trail = from_cp(0xDE3A);
-        trail.push_os_str(suffix);
-        let mut other_trail = from_cp(0xDE3B);
-        other_trail.push_os_str(suffix);
+    fn check_surrogates(suffix: &[u16]) {
+        let lead = vec!(0xD83D);
+        let mut trail = vec!(0xDE3A);
+        trail.extend(suffix);
+
+        let mut other_trail = vec!(0xDE3B);
+        other_trail.extend(suffix);
         let mut full = lead.clone();
-        full.push_os_str(&trail);
-        assert_eq!(full, { let mut x = os!("😺").to_owned(); x.push_os_str(suffix); x });
+        full.extend(&trail);
+
+
+
+        assert_eq!(full, {
+            let mut x = os!("😺").to_owned();
+            x.push_os_str(suffix);
+            x
+        });
 
         assert!(full.ends_with(&full));
         assert!(lead.ends_with(&lead));
@@ -414,9 +434,9 @@ fn wtf8_ends_with() {
         assert!(!trail.ends_with(&full));
     }
 
-    check_surrogates(os!(""));
-    check_surrogates(os!("a"));
-    check_surrogates(&from_cp(0xDE3A)[..]);
+    check_surrogates(&[]);
+    check_surrogates(&[b'a' as u16]);
+    check_surrogates(&[0xDE3A]);
 }
 
 #[test]

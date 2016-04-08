@@ -144,11 +144,19 @@ pub unsafe fn ptr_range_starts_with_valid_utf8(start: *const u8, end: *const u8)
     }
 }
 
+#[inline]
+#[cfg(test)]
+pub fn byte_slice_starts_with_valid_utf8(s: &[u8]) -> bool {
+    unsafe {
+        let a = s.as_ptr();
+        let b = a.offset(s.len() as isize);
+        ptr_range_starts_with_valid_utf8(a, b)
+    }
+}
+
 #[test]
 fn test_ptr_range_starts_with_valid_utf8() {
-    let check = |s: &'static [u8]| unsafe {
-        ptr_range_starts_with_valid_utf8(s.as_ptr(), s.as_ptr().offset(s.len() as isize))
-    };
+    let check = |s: &'static [u8]| byte_slice_starts_with_valid_utf8(s);
 
     assert!(check(b"abcde"));
     assert!(check(b"abcd"));
@@ -208,11 +216,19 @@ pub unsafe fn ptr_range_ends_with_valid_utf8(start: *const u8, mut end: *const u
     end == original_end
 }
 
+#[inline]
+#[cfg(test)]
+pub fn byte_slice_ends_with_valid_utf8(s: &[u8]) -> bool {
+    unsafe {
+        let a = s.as_ptr();
+        let b = a.offset(s.len() as isize);
+        ptr_range_ends_with_valid_utf8(a, b)
+    }
+}
+
 #[test]
 fn test_ptr_range_ends_with_valid_utf8() {
-    let check = |s: &'static [u8]| unsafe {
-        ptr_range_ends_with_valid_utf8(s.as_ptr(), s.as_ptr().offset(s.len() as isize))
-    };
+    let check = |s: &'static [u8]| byte_slice_ends_with_valid_utf8(s);
 
     assert!(check(b"abcde"));
     assert!(check(b"abcd"));

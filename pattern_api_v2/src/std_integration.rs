@@ -180,8 +180,8 @@ pub trait OsStrExtension {
 pub trait OsStringExtension {
     fn from_wide(s: &[u16]) -> Self;
     fn push_str(&mut self, &str);
-    fn push_os_str(&mut self, &OsStr);
-    fn push_codepoint(&mut self, u32);
+    /*fn push_os_str(&mut self, &OsStr);*/
+    fn push_codepoint_unadjusted(&mut self, u32);
 }
 
 impl OsStrExtension for OsStr {
@@ -208,10 +208,10 @@ impl OsStringExtension for OsString {
         for item in char::decode_utf16(v.iter().cloned()) {
             match item {
                 Ok(ch) => {
-                    string.push_codepoint(ch as u32);
+                    string.push_codepoint_unadjusted(ch as u32);
                 }
                 Err(surrogate) => {
-                    string.push_codepoint(surrogate as u32);
+                    string.push_codepoint_unadjusted(surrogate as u32);
                 }
             }
         }
@@ -223,13 +223,14 @@ impl OsStringExtension for OsString {
                 .extend(s.bytes());
         }
     }
-    fn push_os_str(&mut self, s: &OsStr) {
+    /*fn push_os_str(&mut self, s: &OsStr) {
         unsafe {
             ::std::mem::transmute::<&mut OsString, &mut Vec<u8>>(self)
                 .extend(s.as_bytes().iter().clone());
         }
     }
-    fn push_codepoint(&mut self, cp: u32) {
+    */
+    fn push_codepoint_unadjusted(&mut self, cp: u32) {
         unsafe {
             let ch = char::from_u32_unchecked(cp as u32);
             for byte in ch.encode_utf8() {

@@ -428,12 +428,43 @@ macro_rules! impl_both_mutability {
             /// Will handle the pattern `""` as returning empty matches at each character
             /// boundary.
             impl<'a, 'b> Pattern<$slice> for &'b OsStr {
-                pattern_methods!(OsStrSearcher<'a, 'b>,
-                                |s: &'b OsStr| OrdSlicePattern(unsafe {
-                                    mem::transmute::<&'b OsStr, &'b [u8]>(s)
-                                }),
-                                OsStrSearcher,
-                                $slice);
+                pattern_methods!{
+                    OsStrSearcher<'a, 'b>,
+                    |s: &'b OsStr| {
+                        cfg_match! {
+                            // in actual implementation only windows
+                            all() => {
+                                // on windows lone surrogate pairs
+                                // at the front/back
+                                // need to be considered a contract violation
+                                // since it is not possible
+                                // to find them on a OsStr if they
+                                // are encoded as part of a normal
+                                // character
+
+                                let (a, _, b) = super::split_loony_surrogates(s);
+
+                                if a.len() > 0 || b.len() > 0 {
+                                    panic!("The Pattern API does not support \
+                                            searching for strings \
+                                            starting or ending with \
+                                            lone surrogate codepoints");
+                                }
+                            }
+                            unix => {
+                                // OsStr are byte encodings already, no
+                                // checking needed...
+                            }
+                        }
+
+                        unsafe {
+                            OrdSlicePattern(
+                                mem::transmute::<&'b OsStr, &'b [u8]>(s))
+                        }
+                    },
+                    OsStrSearcher,
+                    $slice
+                }
             }
 
             unsafe impl<'a, 'b> Searcher<$slice> for OsStrSearcher<'a, 'b> {
@@ -657,3 +688,73 @@ impl<'a, 'b> Pattern<&'a OsStr> for &'b OsString {
 impl<'a, 'b, 'c> Pattern<&'a OsStr> for &'c &'b OsStr {
     pattern_methods!(shared::OsStrSearcher<'a, 'b>, |&s| s, |s| s, &'a OsStr);
 }
+
+fn starts_with_surrogate(v: &[u8]) -> Option<u16> {
+    let mut iter = v.iter().cloned();
+    use utf8::next_code_point;
+
+    if v.len() >= 3
+    && v[0] == 237
+    && v[1] >= 160
+    && v[1] <= 191
+    && v[2] >= 128
+    && v[2] <= 191 {
+        next_code_point(|| iter.next()).map(|c| c as u32 as u16)
+    } else {
+        None
+    }
+}
+
+fn ends_with_surrogate(v: &[u8]) -> Option<u16> {
+    if v.len() >= 3 {
+        starts_with_surrogate(&v[v.len() - 3..])
+    } else {
+        None
+    }
+}
+
+fn split_loony_surrogates(s: &OsStr) -> (&[u8], &[u8], &[u8]) {
+    let s = unsafe {
+        ::std::mem::transmute::<&OsStr, &[u8]>(s)
+    };
+
+    let mut front_len = 0;
+    if let Some(s) = starts_with_surrogate(s) {
+        if (0xDC00...0xDFFF).contains(s) {
+            front_len = 3;
+        }
+    };
+
+    let mut back_len = 0;
+    if let Some(s) = ends_with_surrogate(s) {
+        if (0xD800...0xDBFF).contains(s) {
+            back_len = 3;
+        }
+    };
+
+    let a = front_len;
+    let b = s.len() - back_len;
+
+    (&s[..a], &s[a..b], &s[b..])
+}
+
+#[test]
+fn test_split_loony_surrogates() {
+    fn check(s: &[u16]) -> (usize, usize, usize) {
+        use std_integration::OsStringExtension;
+        let s = OsString::from_wide(s);
+        let (x, y, z) = split_loony_surrogates(&s);
+        (x.len(), y.len(), z.len())
+    }
+
+    // regular surrogate pair
+    assert_eq!(check(&[        0xD800, 0xDC00        ]), (0,4,0));
+    // split-up at front/back
+    assert_eq!(check(&[0xDC00, 0xD800, 0xDC00        ]), (3,4,0));
+    assert_eq!(check(&[        0xD800, 0xDC00, 0xD800]), (0,4,3));
+    assert_eq!(check(&[0xDC00, 0xD800, 0xDC00, 0xD800]), (3,4,3));
+    assert_eq!(check(&[0xDC00,                 0xD800]), (3,0,3));
+    assert_eq!(check(&[0xDC00,                       ]), (3,0,0));
+    assert_eq!(check(&[                        0xD800]), (0,0,3));
+}
+
