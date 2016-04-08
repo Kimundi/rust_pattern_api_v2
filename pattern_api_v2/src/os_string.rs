@@ -432,8 +432,7 @@ macro_rules! impl_both_mutability {
                     OsStrSearcher<'a, 'b>,
                     |s: &'b OsStr| {
                         cfg_match! {
-                            // in actual implementation only windows
-                            all() => {
+                            windows => {
                                 // on windows lone surrogate pairs
                                 // at the front/back
                                 // need to be considered a contract violation
@@ -452,8 +451,8 @@ macro_rules! impl_both_mutability {
                                 }
                             }
                             unix => {
-                                // OsStr are byte encodings already, no
-                                // checking needed...
+                                // On this platform the surrogate issue
+                                // does not exist
                             }
                         }
 
