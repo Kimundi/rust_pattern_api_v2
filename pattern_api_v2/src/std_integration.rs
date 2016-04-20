@@ -210,7 +210,8 @@ impl OsStringExtension for OsString {
                     string.push_codepoint_unadjusted(ch as u32);
                 }
                 Err(surrogate) => {
-                    string.push_codepoint_unadjusted(surrogate as u32);
+                    string.push_codepoint_unadjusted(
+                        surrogate.unpaired_surrogate() as u32);
                 }
             }
         }
