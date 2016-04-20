@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["mutable",""],["shared",""]],"struct":[["Elem",""]]});

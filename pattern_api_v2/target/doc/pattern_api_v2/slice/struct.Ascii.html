@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `Ascii` struct in crate `pattern_api_v2`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Ascii">
+
+    <title>pattern_api_v2::slice::Ascii - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../index.html'>pattern_api_v2</a>::<wbr><a href='index.html'>slice</a></p><script>window.sidebarCurrent = {name: 'Ascii', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='../index.html'>pattern_api_v2</a>::<wbr><a href='index.html'>slice</a>::<wbr><a class='struct' href=''>Ascii</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-230' class='srclink' href='../../src/pattern_api_v2/src/slice.rs.html.html#26' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct Ascii(pub <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>);</pre><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl&lt;'a&gt; <a class='trait' href='../../pattern_api_v2/core_traits/trait.Pattern.html' title='pattern_api_v2::core_traits::Pattern'>Pattern</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;'a mut [</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>&gt; for <a class='struct' href='../../pattern_api_v2/slice/struct.Ascii.html' title='pattern_api_v2::slice::Ascii'>Ascii</a></code></h3><div class='impl-items'><h4 id='associatedtype.Searcher' class='type'><code>type Searcher = <a class='struct' href='../../pattern_api_v2/slice/struct.AsciiSearcher.html' title='pattern_api_v2::slice::AsciiSearcher'>AsciiSearcher</a>&lt;'a&gt;</code></h4>
+<h4 id='method.into_searcher' class='method'><code>fn <a href='../../pattern_api_v2/core_traits/trait.Pattern.html#method.into_searcher' class='fnname'>into_searcher</a>(self, haystack: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;'a mut [</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>) -&gt; Self::<a class='trait' href='../../pattern_api_v2/core_traits/trait.Pattern.html' title='pattern_api_v2::core_traits::Pattern'>Searcher</a></code></h4>
+<h4 id='method.is_prefix_of' class='method'><code>fn <a href='../../pattern_api_v2/core_traits/trait.Pattern.html#method.is_prefix_of' class='fnname'>is_prefix_of</a>(self, haystack: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;'a mut [</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.is_suffix_of' class='method'><code>fn <a href='../../pattern_api_v2/core_traits/trait.Pattern.html#method.is_suffix_of' class='fnname'>is_suffix_of</a>(self, haystack: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;'a mut [</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a> <span class='where'>where Self::<a class='trait' href='../../pattern_api_v2/core_traits/trait.Pattern.html' title='pattern_api_v2::core_traits::Pattern'>Searcher</a>: <a class='trait' href='../../pattern_api_v2/core_traits/trait.ReverseSearcher.html' title='pattern_api_v2::core_traits::ReverseSearcher'>ReverseSearcher</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;'a mut [</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>&gt;</span></code></h4>
+<h4 id='method.is_contained_in' class='method'><code>fn <a href='../../pattern_api_v2/core_traits/trait.Pattern.html#method.is_contained_in' class='fnname'>is_contained_in</a>(self, haystack: H) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "pattern_api_v2";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script defer src="../../search-index.js"></script>
+</body>
+</html>

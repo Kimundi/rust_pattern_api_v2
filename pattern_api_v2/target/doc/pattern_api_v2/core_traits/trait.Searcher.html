@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `Searcher` trait in crate `pattern_api_v2`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Searcher">
+
+    <title>pattern_api_v2::core_traits::Searcher - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../index.html'>pattern_api_v2</a>::<wbr><a href='index.html'>core_traits</a></p><script>window.sidebarCurrent = {name: 'Searcher', ty: 'trait', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content trait">
+<h1 class='fqn'><span class='in-band'>Trait <a href='../index.html'>pattern_api_v2</a>::<wbr><a href='index.html'>core_traits</a>::<wbr><a class='trait' href=''>Searcher</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-596' class='srclink' href='../../src/pattern_api_v2/src/core_traits.rs.html#76-81' title='goto source code'>[src]</a></span></h1>
+<pre class='rust trait'>pub unsafe trait Searcher&lt;H: <a class='trait' href='../../pattern_api_v2/core_traits/trait.PatternHaystack.html' title='pattern_api_v2::core_traits::PatternHaystack'>PatternHaystack</a>&gt; {
+    fn <a href='#tymethod.haystack' class='fnname'>haystack</a>(&amp;self) -&gt; H::Haystack;
+    fn <a href='#tymethod.next_match' class='fnname'>next_match</a>(&amp;mut self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(</a>H::Cursor, H::Cursor<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>)</a>&gt;;
+    fn <a href='#tymethod.next_reject' class='fnname'>next_reject</a>(&amp;mut self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(</a>H::Cursor, H::Cursor<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>)</a>&gt;;
+}</pre>
+            <h2 id='required-methods'>Required Methods</h2>
+            <div class='methods'>
+        <h3 id='tymethod.haystack' class='method stab '><code>fn <a href='#tymethod.haystack' class='fnname'>haystack</a>(&amp;self) -&gt; H::Haystack</code></h3><h3 id='tymethod.next_match' class='method stab '><code>fn <a href='#tymethod.next_match' class='fnname'>next_match</a>(&amp;mut self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(</a>H::Cursor, H::Cursor<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>)</a>&gt;</code></h3><h3 id='tymethod.next_reject' class='method stab '><code>fn <a href='#tymethod.next_reject' class='fnname'>next_reject</a>(&amp;mut self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(</a>H::Cursor, H::Cursor<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>)</a>&gt;</code></h3></div>
+        <h2 id='implementors'>Implementors</h2>
+        <ul class='item-list' id='implementors-list'>
+    <li><code>impl&lt;'b, H: <a class='trait' href='../../pattern_api_v2/fast_sequence_search/trait.OrdSlice.html' title='pattern_api_v2::fast_sequence_search::OrdSlice'>OrdSlice</a>&gt; <a class='trait' href='../../pattern_api_v2/core_traits/trait.Searcher.html' title='pattern_api_v2::core_traits::Searcher'>Searcher</a>&lt;H&gt; for <a class='struct' href='../../pattern_api_v2/fast_sequence_search/struct.OrdSeqSearcher.html' title='pattern_api_v2::fast_sequence_search::OrdSeqSearcher'>OrdSeqSearcher</a>&lt;'b, H&gt; <span class='where'>where H: <a class='trait' href='../../pattern_api_v2/core_traits/trait.PatternHaystack.html' title='pattern_api_v2::core_traits::PatternHaystack'>PatternHaystack</a></span></code></li>
+<li><code>impl&lt;'a, C: CharEq&gt; <a class='trait' href='../../pattern_api_v2/core_traits/trait.Searcher.html' title='pattern_api_v2::core_traits::Searcher'>Searcher</a>&lt;&amp;'a <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt; for <a class='struct' href='../../pattern_api_v2/string/shared/struct.CharEqSearcher.html' title='pattern_api_v2::string::shared::CharEqSearcher'>CharEqSearcher</a>&lt;'a, C&gt;</code></li>
+<li><code>impl&lt;'a&gt; <a class='trait' href='../../pattern_api_v2/core_traits/trait.Searcher.html' title='pattern_api_v2::core_traits::Searcher'>Searcher</a>&lt;&amp;'a <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt; for <a class='struct' href='../../pattern_api_v2/string/shared/struct.CharSearcher.html' title='pattern_api_v2::string::shared::CharSearcher'>CharSearcher</a>&lt;'a&gt;</code></li>
+<li><code>impl&lt;'a, 'b&gt; <a class='trait' href='../../pattern_api_v2/core_traits/trait.Searcher.html' title='pattern_api_v2::core_traits::Searcher'>Searcher</a>&lt;&amp;'a <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt; for <a class='struct' href='../../pattern_api_v2/string/shared/struct.CharSliceSearcher.html' title='pattern_api_v2::string::shared::CharSliceSearcher'>CharSliceSearcher</a>&lt;'a, 'b&gt;</code></li>
+<li><code>impl&lt;'a, F&gt; <a class='trait' href='../../pattern_api_v2/core_traits/trait.Searcher.html' title='pattern_api_v2::core_traits::Searcher'>Searcher</a>&lt;&amp;'a <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt; for <a class='struct' href='../../pattern_api_v2/string/shared/struct.CharPredicateSearcher.html' title='pattern_api_v2::string::shared::CharPredicateSearcher'>CharPredicateSearcher</a>&lt;'a, F&gt; <span class='where'>where F: <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.FnMut.html' title='core::ops::FnMut'>FnMut</a>(<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.char.html'>char</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></span></code></li>
+<li><code>impl&lt;'a, 'b&gt; <a class='trait' href='../../pattern_api_v2/core_traits/trait.Searcher.html' title='pattern_api_v2::core_traits::Searcher'>Searcher</a>&lt;&amp;'a <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt; for <a class='struct' href='../../pattern_api_v2/string/shared/struct.StrSearcher.html' title='pattern_api_v2::string::shared::StrSearcher'>StrSearcher</a>&lt;'a, 'b&gt;</code></li>
+<li><code>impl&lt;'a, C: CharEq&gt; <a class='trait' href='../../pattern_api_v2/core_traits/trait.Searcher.html' title='pattern_api_v2::core_traits::Searcher'>Searcher</a>&lt;&amp;'a mut <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt; for <a class='struct' href='../../pattern_api_v2/string/mutable/struct.CharEqSearcher.html' title='pattern_api_v2::string::mutable::CharEqSearcher'>CharEqSearcher</a>&lt;'a, C&gt;</code></li>
+<li><code>impl&lt;'a&gt; <a class='trait' href='../../pattern_api_v2/core_traits/trait.Searcher.html' title='pattern_api_v2::core_traits::Searcher'>Searcher</a>&lt;&amp;'a mut <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt; for <a class='struct' href='../../pattern_api_v2/string/mutable/struct.CharSearcher.html' title='pattern_api_v2::string::mutable::CharSearcher'>CharSearcher</a>&lt;'a&gt;</code></li>
+<li><code>impl&lt;'a, 'b&gt; <a class='trait' href='../../pattern_api_v2/core_traits/trait.Searcher.html' title='pattern_api_v2::core_traits::Searcher'>Searcher</a>&lt;&amp;'a mut <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt; for <a class='struct' href='../../pattern_api_v2/string/mutable/struct.CharSliceSearcher.html' title='pattern_api_v2::string::mutable::CharSliceSearcher'>CharSliceSearcher</a>&lt;'a, 'b&gt;</code></li>
+<li><code>impl&lt;'a, F&gt; <a class='trait' href='../../pattern_api_v2/core_traits/trait.Searcher.html' title='pattern_api_v2::core_traits::Searcher'>Searcher</a>&lt;&amp;'a mut <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt; for <a class='struct' href='../../pattern_api_v2/string/mutable/struct.CharPredicateSearcher.html' title='pattern_api_v2::string::mutable::CharPredicateSearcher'>CharPredicateSearcher</a>&lt;'a, F&gt; <span class='where'>where F: <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.FnMut.html' title='core::ops::FnMut'>FnMut</a>(<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.char.html'>char</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></span></code></li>
+<li><code>impl&lt;'a, 'b&gt; <a class='trait' href='../../pattern_api_v2/core_traits/trait.Searcher.html' title='pattern_api_v2::core_traits::Searcher'>Searcher</a>&lt;&amp;'a mut <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt; for <a class='struct' href='../../pattern_api_v2/string/mutable/struct.StrSearcher.html' title='pattern_api_v2::string::mutable::StrSearcher'>StrSearcher</a>&lt;'a, 'b&gt;</code></li>
+<li><code>impl&lt;'a, T: <a class='trait' href='https://doc.rust-lang.org/nightly/core/cmp/trait.Eq.html' title='core::cmp::Eq'>Eq</a>&gt; <a class='trait' href='../../pattern_api_v2/core_traits/trait.Searcher.html' title='pattern_api_v2::core_traits::Searcher'>Searcher</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;'a [</a>T<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>&gt; for <a class='struct' href='../../pattern_api_v2/slice/shared/struct.ElemSearcher.html' title='pattern_api_v2::slice::shared::ElemSearcher'>ElemSearcher</a>&lt;'a, T&gt;</code></li>
+<li><code>impl&lt;'a, T, F&gt; <a class='trait' href='../../pattern_api_v2/core_traits/trait.Searcher.html' title='pattern_api_v2::core_traits::Searcher'>Searcher</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;'a [</a>T<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>&gt; for <a class='struct' href='../../pattern_api_v2/slice/shared/struct.ElemPredicateSearcher.html' title='pattern_api_v2::slice::shared::ElemPredicateSearcher'>ElemPredicateSearcher</a>&lt;'a, T, F&gt; <span class='where'>where F: <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.FnMut.html' title='core::ops::FnMut'>FnMut</a>(&amp;T) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></span></code></li>
+<li><code>impl&lt;'a, 'b, T: <a class='trait' href='https://doc.rust-lang.org/nightly/core/cmp/trait.Ord.html' title='core::cmp::Ord'>Ord</a>&gt; <a class='trait' href='../../pattern_api_v2/core_traits/trait.Searcher.html' title='pattern_api_v2::core_traits::Searcher'>Searcher</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;'a [</a>T<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>&gt; for <a class='struct' href='../../pattern_api_v2/slice/shared/struct.SliceSearcher.html' title='pattern_api_v2::slice::shared::SliceSearcher'>SliceSearcher</a>&lt;'a, 'b, T&gt;</code></li>
+<li><code>impl&lt;'a, T: <a class='trait' href='https://doc.rust-lang.org/nightly/core/cmp/trait.Eq.html' title='core::cmp::Eq'>Eq</a>&gt; <a class='trait' href='../../pattern_api_v2/core_traits/trait.Searcher.html' title='pattern_api_v2::core_traits::Searcher'>Searcher</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;'a mut [</a>T<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>&gt; for <a class='struct' href='../../pattern_api_v2/slice/mutable/struct.ElemSearcher.html' title='pattern_api_v2::slice::mutable::ElemSearcher'>ElemSearcher</a>&lt;'a, T&gt;</code></li>
+<li><code>impl&lt;'a, T, F&gt; <a class='trait' href='../../pattern_api_v2/core_traits/trait.Searcher.html' title='pattern_api_v2::core_traits::Searcher'>Searcher</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;'a mut [</a>T<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>&gt; for <a class='struct' href='../../pattern_api_v2/slice/mutable/struct.ElemPredicateSearcher.html' title='pattern_api_v2::slice::mutable::ElemPredicateSearcher'>ElemPredicateSearcher</a>&lt;'a, T, F&gt; <span class='where'>where F: <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.FnMut.html' title='core::ops::FnMut'>FnMut</a>(&amp;T) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></span></code></li>
+<li><code>impl&lt;'a, 'b, T: <a class='trait' href='https://doc.rust-lang.org/nightly/core/cmp/trait.Ord.html' title='core::cmp::Ord'>Ord</a>&gt; <a class='trait' href='../../pattern_api_v2/core_traits/trait.Searcher.html' title='pattern_api_v2::core_traits::Searcher'>Searcher</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;'a mut [</a>T<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>&gt; for <a class='struct' href='../../pattern_api_v2/slice/mutable/struct.SliceSearcher.html' title='pattern_api_v2::slice::mutable::SliceSearcher'>SliceSearcher</a>&lt;'a, 'b, T&gt;</code></li>
+<li><code>impl&lt;'a, C: CharEq&gt; <a class='trait' href='../../pattern_api_v2/core_traits/trait.Searcher.html' title='pattern_api_v2::core_traits::Searcher'>Searcher</a>&lt;&amp;'a <a class='struct' href='https://doc.rust-lang.org/nightly/std/ffi/os_str/struct.OsStr.html' title='std::ffi::os_str::OsStr'>OsStr</a>&gt; for <a class='struct' href='../../pattern_api_v2/os_string/shared/struct.CharEqSearcher.html' title='pattern_api_v2::os_string::shared::CharEqSearcher'>CharEqSearcher</a>&lt;'a, C&gt;</code></li>
+<li><code>impl&lt;'a&gt; <a class='trait' href='../../pattern_api_v2/core_traits/trait.Searcher.html' title='pattern_api_v2::core_traits::Searcher'>Searcher</a>&lt;&amp;'a <a class='struct' href='https://doc.rust-lang.org/nightly/std/ffi/os_str/struct.OsStr.html' title='std::ffi::os_str::OsStr'>OsStr</a>&gt; for <a class='struct' href='../../pattern_api_v2/os_string/shared/struct.CharSearcher.html' title='pattern_api_v2::os_string::shared::CharSearcher'>CharSearcher</a>&lt;'a&gt;</code></li>
+<li><code>impl&lt;'a, F&gt; <a class='trait' href='../../pattern_api_v2/core_traits/trait.Searcher.html' title='pattern_api_v2::core_traits::Searcher'>Searcher</a>&lt;&amp;'a <a class='struct' href='https://doc.rust-lang.org/nightly/std/ffi/os_str/struct.OsStr.html' title='std::ffi::os_str::OsStr'>OsStr</a>&gt; for <a class='struct' href='../../pattern_api_v2/os_string/shared/struct.CharPredicateSearcher.html' title='pattern_api_v2::os_string::shared::CharPredicateSearcher'>CharPredicateSearcher</a>&lt;'a, F&gt; <span class='where'>where F: <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.FnMut.html' title='core::ops::FnMut'>FnMut</a>(<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.char.html'>char</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></span></code></li>
+<li><code>impl&lt;'a, 'b&gt; <a class='trait' href='../../pattern_api_v2/core_traits/trait.Searcher.html' title='pattern_api_v2::core_traits::Searcher'>Searcher</a>&lt;&amp;'a <a class='struct' href='https://doc.rust-lang.org/nightly/std/ffi/os_str/struct.OsStr.html' title='std::ffi::os_str::OsStr'>OsStr</a>&gt; for <a class='struct' href='../../pattern_api_v2/os_string/shared/struct.CharSliceSearcher.html' title='pattern_api_v2::os_string::shared::CharSliceSearcher'>CharSliceSearcher</a>&lt;'a, 'b&gt;</code></li>
+<li><code>impl&lt;'a, 'b&gt; <a class='trait' href='../../pattern_api_v2/core_traits/trait.Searcher.html' title='pattern_api_v2::core_traits::Searcher'>Searcher</a>&lt;&amp;'a <a class='struct' href='https://doc.rust-lang.org/nightly/std/ffi/os_str/struct.OsStr.html' title='std::ffi::os_str::OsStr'>OsStr</a>&gt; for <a class='struct' href='../../pattern_api_v2/os_string/shared/struct.OsStrSearcher.html' title='pattern_api_v2::os_string::shared::OsStrSearcher'>OsStrSearcher</a>&lt;'a, 'b&gt;</code></li>
+<li><code>impl&lt;'a, 'b&gt; <a class='trait' href='../../pattern_api_v2/core_traits/trait.Searcher.html' title='pattern_api_v2::core_traits::Searcher'>Searcher</a>&lt;&amp;'a <a class='struct' href='https://doc.rust-lang.org/nightly/std/ffi/os_str/struct.OsStr.html' title='std::ffi::os_str::OsStr'>OsStr</a>&gt; for <a class='struct' href='../../pattern_api_v2/os_string/shared/struct.StrSearcher.html' title='pattern_api_v2::os_string::shared::StrSearcher'>StrSearcher</a>&lt;'a, 'b&gt;</code></li>
+<li><code>impl&lt;'a&gt; <a class='trait' href='../../pattern_api_v2/core_traits/trait.Searcher.html' title='pattern_api_v2::core_traits::Searcher'>Searcher</a>&lt;<a class='struct' href='../../pattern_api_v2/os_string/shared/struct.PartialUnicode.html' title='pattern_api_v2::os_string::shared::PartialUnicode'>PartialUnicode</a>&lt;'a&gt;&gt; for <a class='struct' href='../../pattern_api_v2/os_string/shared/struct.CharSearcher.html' title='pattern_api_v2::os_string::shared::CharSearcher'>CharSearcher</a>&lt;'a&gt;</code></li>
+<li><code>impl&lt;'a, F&gt; <a class='trait' href='../../pattern_api_v2/core_traits/trait.Searcher.html' title='pattern_api_v2::core_traits::Searcher'>Searcher</a>&lt;<a class='struct' href='../../pattern_api_v2/os_string/shared/struct.PartialUnicode.html' title='pattern_api_v2::os_string::shared::PartialUnicode'>PartialUnicode</a>&lt;'a&gt;&gt; for <a class='struct' href='../../pattern_api_v2/os_string/shared/struct.CharPredicateSearcher.html' title='pattern_api_v2::os_string::shared::CharPredicateSearcher'>CharPredicateSearcher</a>&lt;'a, F&gt; <span class='where'>where F: <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.FnMut.html' title='core::ops::FnMut'>FnMut</a>(<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.char.html'>char</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></span></code></li>
+<li><code>impl&lt;'a, 'b&gt; <a class='trait' href='../../pattern_api_v2/core_traits/trait.Searcher.html' title='pattern_api_v2::core_traits::Searcher'>Searcher</a>&lt;<a class='struct' href='../../pattern_api_v2/os_string/shared/struct.PartialUnicode.html' title='pattern_api_v2::os_string::shared::PartialUnicode'>PartialUnicode</a>&lt;'a&gt;&gt; for <a class='struct' href='../../pattern_api_v2/os_string/shared/struct.CharSliceSearcher.html' title='pattern_api_v2::os_string::shared::CharSliceSearcher'>CharSliceSearcher</a>&lt;'a, 'b&gt;</code></li>
+<li><code>impl&lt;'a, 'b&gt; <a class='trait' href='../../pattern_api_v2/core_traits/trait.Searcher.html' title='pattern_api_v2::core_traits::Searcher'>Searcher</a>&lt;<a class='struct' href='../../pattern_api_v2/os_string/shared/struct.PartialUnicode.html' title='pattern_api_v2::os_string::shared::PartialUnicode'>PartialUnicode</a>&lt;'a&gt;&gt; for <a class='struct' href='../../pattern_api_v2/os_string/shared/struct.StrSearcher.html' title='pattern_api_v2::os_string::shared::StrSearcher'>StrSearcher</a>&lt;'a, 'b&gt;</code></li>
+<li><code>impl&lt;'a, C: CharEq&gt; <a class='trait' href='../../pattern_api_v2/core_traits/trait.Searcher.html' title='pattern_api_v2::core_traits::Searcher'>Searcher</a>&lt;&amp;'a mut <a class='struct' href='https://doc.rust-lang.org/nightly/std/ffi/os_str/struct.OsStr.html' title='std::ffi::os_str::OsStr'>OsStr</a>&gt; for <a class='struct' href='../../pattern_api_v2/os_string/mutable/struct.CharEqSearcher.html' title='pattern_api_v2::os_string::mutable::CharEqSearcher'>CharEqSearcher</a>&lt;'a, C&gt;</code></li>
+<li><code>impl&lt;'a&gt; <a class='trait' href='../../pattern_api_v2/core_traits/trait.Searcher.html' title='pattern_api_v2::core_traits::Searcher'>Searcher</a>&lt;&amp;'a mut <a class='struct' href='https://doc.rust-lang.org/nightly/std/ffi/os_str/struct.OsStr.html' title='std::ffi::os_str::OsStr'>OsStr</a>&gt; for <a class='struct' href='../../pattern_api_v2/os_string/mutable/struct.CharSearcher.html' title='pattern_api_v2::os_string::mutable::CharSearcher'>CharSearcher</a>&lt;'a&gt;</code></li>
+<li><code>impl&lt;'a, F&gt; <a class='trait' href='../../pattern_api_v2/core_traits/trait.Searcher.html' title='pattern_api_v2::core_traits::Searcher'>Searcher</a>&lt;&amp;'a mut <a class='struct' href='https://doc.rust-lang.org/nightly/std/ffi/os_str/struct.OsStr.html' title='std::ffi::os_str::OsStr'>OsStr</a>&gt; for <a class='struct' href='../../pattern_api_v2/os_string/mutable/struct.CharPredicateSearcher.html' title='pattern_api_v2::os_string::mutable::CharPredicateSearcher'>CharPredicateSearcher</a>&lt;'a, F&gt; <span class='where'>where F: <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.FnMut.html' title='core::ops::FnMut'>FnMut</a>(<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.char.html'>char</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></span></code></li>
+<li><code>impl&lt;'a, 'b&gt; <a class='trait' href='../../pattern_api_v2/core_traits/trait.Searcher.html' title='pattern_api_v2::core_traits::Searcher'>Searcher</a>&lt;&amp;'a mut <a class='struct' href='https://doc.rust-lang.org/nightly/std/ffi/os_str/struct.OsStr.html' title='std::ffi::os_str::OsStr'>OsStr</a>&gt; for <a class='struct' href='../../pattern_api_v2/os_string/mutable/struct.CharSliceSearcher.html' title='pattern_api_v2::os_string::mutable::CharSliceSearcher'>CharSliceSearcher</a>&lt;'a, 'b&gt;</code></li>
+<li><code>impl&lt;'a, 'b&gt; <a class='trait' href='../../pattern_api_v2/core_traits/trait.Searcher.html' title='pattern_api_v2::core_traits::Searcher'>Searcher</a>&lt;&amp;'a mut <a class='struct' href='https://doc.rust-lang.org/nightly/std/ffi/os_str/struct.OsStr.html' title='std::ffi::os_str::OsStr'>OsStr</a>&gt; for <a class='struct' href='../../pattern_api_v2/os_string/mutable/struct.OsStrSearcher.html' title='pattern_api_v2::os_string::mutable::OsStrSearcher'>OsStrSearcher</a>&lt;'a, 'b&gt;</code></li>
+<li><code>impl&lt;'a, 'b&gt; <a class='trait' href='../../pattern_api_v2/core_traits/trait.Searcher.html' title='pattern_api_v2::core_traits::Searcher'>Searcher</a>&lt;&amp;'a mut <a class='struct' href='https://doc.rust-lang.org/nightly/std/ffi/os_str/struct.OsStr.html' title='std::ffi::os_str::OsStr'>OsStr</a>&gt; for <a class='struct' href='../../pattern_api_v2/os_string/mutable/struct.StrSearcher.html' title='pattern_api_v2::os_string::mutable::StrSearcher'>StrSearcher</a>&lt;'a, 'b&gt;</code></li>
+<li><code>impl&lt;'a&gt; <a class='trait' href='../../pattern_api_v2/core_traits/trait.Searcher.html' title='pattern_api_v2::core_traits::Searcher'>Searcher</a>&lt;<a class='struct' href='../../pattern_api_v2/os_string/mutable/struct.PartialUnicode.html' title='pattern_api_v2::os_string::mutable::PartialUnicode'>PartialUnicode</a>&lt;'a&gt;&gt; for <a class='struct' href='../../pattern_api_v2/os_string/mutable/struct.CharSearcher.html' title='pattern_api_v2::os_string::mutable::CharSearcher'>CharSearcher</a>&lt;'a&gt;</code></li>
+<li><code>impl&lt;'a, F&gt; <a class='trait' href='../../pattern_api_v2/core_traits/trait.Searcher.html' title='pattern_api_v2::core_traits::Searcher'>Searcher</a>&lt;<a class='struct' href='../../pattern_api_v2/os_string/mutable/struct.PartialUnicode.html' title='pattern_api_v2::os_string::mutable::PartialUnicode'>PartialUnicode</a>&lt;'a&gt;&gt; for <a class='struct' href='../../pattern_api_v2/os_string/mutable/struct.CharPredicateSearcher.html' title='pattern_api_v2::os_string::mutable::CharPredicateSearcher'>CharPredicateSearcher</a>&lt;'a, F&gt; <span class='where'>where F: <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.FnMut.html' title='core::ops::FnMut'>FnMut</a>(<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.char.html'>char</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></span></code></li>
+<li><code>impl&lt;'a, 'b&gt; <a class='trait' href='../../pattern_api_v2/core_traits/trait.Searcher.html' title='pattern_api_v2::core_traits::Searcher'>Searcher</a>&lt;<a class='struct' href='../../pattern_api_v2/os_string/mutable/struct.PartialUnicode.html' title='pattern_api_v2::os_string::mutable::PartialUnicode'>PartialUnicode</a>&lt;'a&gt;&gt; for <a class='struct' href='../../pattern_api_v2/os_string/mutable/struct.CharSliceSearcher.html' title='pattern_api_v2::os_string::mutable::CharSliceSearcher'>CharSliceSearcher</a>&lt;'a, 'b&gt;</code></li>
+<li><code>impl&lt;'a, 'b&gt; <a class='trait' href='../../pattern_api_v2/core_traits/trait.Searcher.html' title='pattern_api_v2::core_traits::Searcher'>Searcher</a>&lt;<a class='struct' href='../../pattern_api_v2/os_string/mutable/struct.PartialUnicode.html' title='pattern_api_v2::os_string::mutable::PartialUnicode'>PartialUnicode</a>&lt;'a&gt;&gt; for <a class='struct' href='../../pattern_api_v2/os_string/mutable/struct.StrSearcher.html' title='pattern_api_v2::os_string::mutable::StrSearcher'>StrSearcher</a>&lt;'a, 'b&gt;</code></li>
+</ul><script type="text/javascript" async
+                         src="../../implementors/pattern_api_v2/core_traits/trait.Searcher.js">
+                 </script></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "pattern_api_v2";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script defer src="../../search-index.js"></script>
+</body>
+</html>

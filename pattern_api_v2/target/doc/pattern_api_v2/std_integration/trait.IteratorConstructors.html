@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `IteratorConstructors` trait in crate `pattern_api_v2`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, IteratorConstructors">
+
+    <title>pattern_api_v2::std_integration::IteratorConstructors - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../index.html'>pattern_api_v2</a>::<wbr><a href='index.html'>std_integration</a></p><script>window.sidebarCurrent = {name: 'IteratorConstructors', ty: 'trait', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content trait">
+<h1 class='fqn'><span class='in-band'>Trait <a href='../index.html'>pattern_api_v2</a>::<wbr><a href='index.html'>std_integration</a>::<wbr><a class='trait' href=''>IteratorConstructors</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-4176' class='srclink' href='../../src/pattern_api_v2/src/std_integration.rs.html#9-160' title='goto source code'>[src]</a></span></h1>
+<pre class='rust trait'>pub trait IteratorConstructors: <a class='trait' href='../../pattern_api_v2/core_traits/trait.PatternHaystack.html' title='pattern_api_v2::core_traits::PatternHaystack'>PatternHaystack</a> {
+    fn <a href='#method.contains' class='fnname'>contains</a>&lt;P: <a class='trait' href='../../pattern_api_v2/core_traits/trait.Pattern.html' title='pattern_api_v2::core_traits::Pattern'>Pattern</a>&lt;Self&gt;&gt;(self, pat: P) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a> { ... }
+    fn <a href='#method.split' class='fnname'>split</a>&lt;P: <a class='trait' href='../../pattern_api_v2/core_traits/trait.Pattern.html' title='pattern_api_v2::core_traits::Pattern'>Pattern</a>&lt;Self&gt;&gt;(self, pat: P) -&gt; <a class='struct' href='../../pattern_api_v2/iterators/struct.Split.html' title='pattern_api_v2::iterators::Split'>Split</a>&lt;Self, P&gt; <span class='where'>where Self: <a class='trait' href='../../pattern_api_v2/core_traits/trait.InverseMatchesAreValid.html' title='pattern_api_v2::core_traits::InverseMatchesAreValid'>InverseMatchesAreValid</a></span> { ... }
+    fn <a href='#method.rsplit' class='fnname'>rsplit</a>&lt;P: <a class='trait' href='../../pattern_api_v2/core_traits/trait.Pattern.html' title='pattern_api_v2::core_traits::Pattern'>Pattern</a>&lt;Self&gt;&gt;(self, pat: P) -&gt; <a class='struct' href='../../pattern_api_v2/iterators/struct.RSplit.html' title='pattern_api_v2::iterators::RSplit'>RSplit</a>&lt;Self, P&gt; <span class='where'>where P::Searcher: <a class='trait' href='../../pattern_api_v2/core_traits/trait.ReverseSearcher.html' title='pattern_api_v2::core_traits::ReverseSearcher'>ReverseSearcher</a>&lt;Self&gt;, Self: <a class='trait' href='../../pattern_api_v2/core_traits/trait.InverseMatchesAreValid.html' title='pattern_api_v2::core_traits::InverseMatchesAreValid'>InverseMatchesAreValid</a></span> { ... }
+    fn <a href='#method.splitn' class='fnname'>splitn</a>&lt;P: <a class='trait' href='../../pattern_api_v2/core_traits/trait.Pattern.html' title='pattern_api_v2::core_traits::Pattern'>Pattern</a>&lt;Self&gt;&gt;(self, count: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>, pat: P) -&gt; <a class='struct' href='../../pattern_api_v2/iterators/struct.SplitN.html' title='pattern_api_v2::iterators::SplitN'>SplitN</a>&lt;Self, P&gt; <span class='where'>where Self: <a class='trait' href='../../pattern_api_v2/core_traits/trait.InverseMatchesAreValid.html' title='pattern_api_v2::core_traits::InverseMatchesAreValid'>InverseMatchesAreValid</a></span> { ... }
+    fn <a href='#method.rsplitn' class='fnname'>rsplitn</a>&lt;P: <a class='trait' href='../../pattern_api_v2/core_traits/trait.Pattern.html' title='pattern_api_v2::core_traits::Pattern'>Pattern</a>&lt;Self&gt;&gt;(self, count: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>, pat: P) -&gt; <a class='struct' href='../../pattern_api_v2/iterators/struct.RSplitN.html' title='pattern_api_v2::iterators::RSplitN'>RSplitN</a>&lt;Self, P&gt; <span class='where'>where P::Searcher: <a class='trait' href='../../pattern_api_v2/core_traits/trait.ReverseSearcher.html' title='pattern_api_v2::core_traits::ReverseSearcher'>ReverseSearcher</a>&lt;Self&gt;, Self: <a class='trait' href='../../pattern_api_v2/core_traits/trait.InverseMatchesAreValid.html' title='pattern_api_v2::core_traits::InverseMatchesAreValid'>InverseMatchesAreValid</a></span> { ... }
+    fn <a href='#method.split_terminator' class='fnname'>split_terminator</a>&lt;P: <a class='trait' href='../../pattern_api_v2/core_traits/trait.Pattern.html' title='pattern_api_v2::core_traits::Pattern'>Pattern</a>&lt;Self&gt;&gt;(self, pat: P) -&gt; <a class='struct' href='../../pattern_api_v2/iterators/struct.SplitTerminator.html' title='pattern_api_v2::iterators::SplitTerminator'>SplitTerminator</a>&lt;Self, P&gt; <span class='where'>where Self: <a class='trait' href='../../pattern_api_v2/core_traits/trait.InverseMatchesAreValid.html' title='pattern_api_v2::core_traits::InverseMatchesAreValid'>InverseMatchesAreValid</a></span> { ... }
+    fn <a href='#method.rsplit_terminator' class='fnname'>rsplit_terminator</a>&lt;P: <a class='trait' href='../../pattern_api_v2/core_traits/trait.Pattern.html' title='pattern_api_v2::core_traits::Pattern'>Pattern</a>&lt;Self&gt;&gt;(self, pat: P) -&gt; <a class='struct' href='../../pattern_api_v2/iterators/struct.RSplitTerminator.html' title='pattern_api_v2::iterators::RSplitTerminator'>RSplitTerminator</a>&lt;Self, P&gt; <span class='where'>where P::Searcher: <a class='trait' href='../../pattern_api_v2/core_traits/trait.ReverseSearcher.html' title='pattern_api_v2::core_traits::ReverseSearcher'>ReverseSearcher</a>&lt;Self&gt;, Self: <a class='trait' href='../../pattern_api_v2/core_traits/trait.InverseMatchesAreValid.html' title='pattern_api_v2::core_traits::InverseMatchesAreValid'>InverseMatchesAreValid</a></span> { ... }
+    fn <a href='#method.matches' class='fnname'>matches</a>&lt;P: <a class='trait' href='../../pattern_api_v2/core_traits/trait.Pattern.html' title='pattern_api_v2::core_traits::Pattern'>Pattern</a>&lt;Self&gt;&gt;(self, pat: P) -&gt; <a class='struct' href='../../pattern_api_v2/iterators/struct.Matches.html' title='pattern_api_v2::iterators::Matches'>Matches</a>&lt;Self, P&gt; { ... }
+    fn <a href='#method.rmatches' class='fnname'>rmatches</a>&lt;P: <a class='trait' href='../../pattern_api_v2/core_traits/trait.Pattern.html' title='pattern_api_v2::core_traits::Pattern'>Pattern</a>&lt;Self&gt;&gt;(self, pat: P) -&gt; <a class='struct' href='../../pattern_api_v2/iterators/struct.RMatches.html' title='pattern_api_v2::iterators::RMatches'>RMatches</a>&lt;Self, P&gt; <span class='where'>where P::Searcher: <a class='trait' href='../../pattern_api_v2/core_traits/trait.ReverseSearcher.html' title='pattern_api_v2::core_traits::ReverseSearcher'>ReverseSearcher</a>&lt;Self&gt;</span> { ... }
+    fn <a href='#method.match_indices' class='fnname'>match_indices</a>&lt;P: <a class='trait' href='../../pattern_api_v2/core_traits/trait.Pattern.html' title='pattern_api_v2::core_traits::Pattern'>Pattern</a>&lt;Self&gt;&gt;(self, pat: P) -&gt; <a class='struct' href='../../pattern_api_v2/iterators/struct.MatchIndices.html' title='pattern_api_v2::iterators::MatchIndices'>MatchIndices</a>&lt;Self, P&gt; { ... }
+    fn <a href='#method.rmatch_indices' class='fnname'>rmatch_indices</a>&lt;P: <a class='trait' href='../../pattern_api_v2/core_traits/trait.Pattern.html' title='pattern_api_v2::core_traits::Pattern'>Pattern</a>&lt;Self&gt;&gt;(self, pat: P) -&gt; <a class='struct' href='../../pattern_api_v2/iterators/struct.RMatchIndices.html' title='pattern_api_v2::iterators::RMatchIndices'>RMatchIndices</a>&lt;Self, P&gt; <span class='where'>where P::Searcher: <a class='trait' href='../../pattern_api_v2/core_traits/trait.ReverseSearcher.html' title='pattern_api_v2::core_traits::ReverseSearcher'>ReverseSearcher</a>&lt;Self&gt;</span> { ... }
+    fn <a href='#method.starts_with' class='fnname'>starts_with</a>&lt;P: <a class='trait' href='../../pattern_api_v2/core_traits/trait.Pattern.html' title='pattern_api_v2::core_traits::Pattern'>Pattern</a>&lt;Self&gt;&gt;(self, pat: P) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a> { ... }
+    fn <a href='#method.ends_with' class='fnname'>ends_with</a>&lt;P: <a class='trait' href='../../pattern_api_v2/core_traits/trait.Pattern.html' title='pattern_api_v2::core_traits::Pattern'>Pattern</a>&lt;Self&gt;&gt;(self, pat: P) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a> <span class='where'>where P::Searcher: <a class='trait' href='../../pattern_api_v2/core_traits/trait.ReverseSearcher.html' title='pattern_api_v2::core_traits::ReverseSearcher'>ReverseSearcher</a>&lt;Self&gt;</span> { ... }
+    fn <a href='#method.trim_matches' class='fnname'>trim_matches</a>&lt;P: <a class='trait' href='../../pattern_api_v2/core_traits/trait.Pattern.html' title='pattern_api_v2::core_traits::Pattern'>Pattern</a>&lt;Self&gt;&gt;(self, pat: P) -&gt; Self::<a class='trait' href='../../pattern_api_v2/std_integration/trait.IteratorConstructors.html' title='pattern_api_v2::std_integration::IteratorConstructors'>MatchType</a> <span class='where'>where P::Searcher: <a class='trait' href='../../pattern_api_v2/core_traits/trait.DoubleEndedSearcher.html' title='pattern_api_v2::core_traits::DoubleEndedSearcher'>DoubleEndedSearcher</a>&lt;Self&gt;</span> { ... }
+    fn <a href='#method.trim_left_matches' class='fnname'>trim_left_matches</a>&lt;P: <a class='trait' href='../../pattern_api_v2/core_traits/trait.Pattern.html' title='pattern_api_v2::core_traits::Pattern'>Pattern</a>&lt;Self&gt;&gt;(self, pat: P) -&gt; Self::<a class='trait' href='../../pattern_api_v2/std_integration/trait.IteratorConstructors.html' title='pattern_api_v2::std_integration::IteratorConstructors'>MatchType</a> { ... }
+    fn <a href='#method.trim_right_matches' class='fnname'>trim_right_matches</a>&lt;P: <a class='trait' href='../../pattern_api_v2/core_traits/trait.Pattern.html' title='pattern_api_v2::core_traits::Pattern'>Pattern</a>&lt;Self&gt;&gt;(self, pat: P) -&gt; Self::<a class='trait' href='../../pattern_api_v2/std_integration/trait.IteratorConstructors.html' title='pattern_api_v2::std_integration::IteratorConstructors'>MatchType</a> <span class='where'>where P::Searcher: <a class='trait' href='../../pattern_api_v2/core_traits/trait.ReverseSearcher.html' title='pattern_api_v2::core_traits::ReverseSearcher'>ReverseSearcher</a>&lt;Self&gt;</span> { ... }
+    fn <a href='#method.find' class='fnname'>find</a>&lt;P: <a class='trait' href='../../pattern_api_v2/core_traits/trait.Pattern.html' title='pattern_api_v2::core_traits::Pattern'>Pattern</a>&lt;Self&gt;&gt;(self, pat: P) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>&gt; { ... }
+    fn <a href='#method.rfind' class='fnname'>rfind</a>&lt;P: <a class='trait' href='../../pattern_api_v2/core_traits/trait.Pattern.html' title='pattern_api_v2::core_traits::Pattern'>Pattern</a>&lt;Self&gt;&gt;(self, pat: P) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>&gt; <span class='where'>where P::Searcher: <a class='trait' href='../../pattern_api_v2/core_traits/trait.ReverseSearcher.html' title='pattern_api_v2::core_traits::ReverseSearcher'>ReverseSearcher</a>&lt;Self&gt;</span> { ... }
+}</pre>
+            <h2 id='provided-methods'>Provided Methods</h2>
+            <div class='methods'>
+        <h3 id='method.contains' class='method stab '><code>fn <a href='#method.contains' class='fnname'>contains</a>&lt;P: <a class='trait' href='../../pattern_api_v2/core_traits/trait.Pattern.html' title='pattern_api_v2::core_traits::Pattern'>Pattern</a>&lt;Self&gt;&gt;(self, pat: P) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h3><h3 id='method.split' class='method stab '><code>fn <a href='#method.split' class='fnname'>split</a>&lt;P: <a class='trait' href='../../pattern_api_v2/core_traits/trait.Pattern.html' title='pattern_api_v2::core_traits::Pattern'>Pattern</a>&lt;Self&gt;&gt;(self, pat: P) -&gt; <a class='struct' href='../../pattern_api_v2/iterators/struct.Split.html' title='pattern_api_v2::iterators::Split'>Split</a>&lt;Self, P&gt; <span class='where'>where Self: <a class='trait' href='../../pattern_api_v2/core_traits/trait.InverseMatchesAreValid.html' title='pattern_api_v2::core_traits::InverseMatchesAreValid'>InverseMatchesAreValid</a></span></code></h3><h3 id='method.rsplit' class='method stab '><code>fn <a href='#method.rsplit' class='fnname'>rsplit</a>&lt;P: <a class='trait' href='../../pattern_api_v2/core_traits/trait.Pattern.html' title='pattern_api_v2::core_traits::Pattern'>Pattern</a>&lt;Self&gt;&gt;(self, pat: P) -&gt; <a class='struct' href='../../pattern_api_v2/iterators/struct.RSplit.html' title='pattern_api_v2::iterators::RSplit'>RSplit</a>&lt;Self, P&gt; <span class='where'>where P::Searcher: <a class='trait' href='../../pattern_api_v2/core_traits/trait.ReverseSearcher.html' title='pattern_api_v2::core_traits::ReverseSearcher'>ReverseSearcher</a>&lt;Self&gt;, Self: <a class='trait' href='../../pattern_api_v2/core_traits/trait.InverseMatchesAreValid.html' title='pattern_api_v2::core_traits::InverseMatchesAreValid'>InverseMatchesAreValid</a></span></code></h3><h3 id='method.splitn' class='method stab '><code>fn <a href='#method.splitn' class='fnname'>splitn</a>&lt;P: <a class='trait' href='../../pattern_api_v2/core_traits/trait.Pattern.html' title='pattern_api_v2::core_traits::Pattern'>Pattern</a>&lt;Self&gt;&gt;(self, count: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>, pat: P) -&gt; <a class='struct' href='../../pattern_api_v2/iterators/struct.SplitN.html' title='pattern_api_v2::iterators::SplitN'>SplitN</a>&lt;Self, P&gt; <span class='where'>where Self: <a class='trait' href='../../pattern_api_v2/core_traits/trait.InverseMatchesAreValid.html' title='pattern_api_v2::core_traits::InverseMatchesAreValid'>InverseMatchesAreValid</a></span></code></h3><h3 id='method.rsplitn' class='method stab '><code>fn <a href='#method.rsplitn' class='fnname'>rsplitn</a>&lt;P: <a class='trait' href='../../pattern_api_v2/core_traits/trait.Pattern.html' title='pattern_api_v2::core_traits::Pattern'>Pattern</a>&lt;Self&gt;&gt;(self, count: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>, pat: P) -&gt; <a class='struct' href='../../pattern_api_v2/iterators/struct.RSplitN.html' title='pattern_api_v2::iterators::RSplitN'>RSplitN</a>&lt;Self, P&gt; <span class='where'>where P::Searcher: <a class='trait' href='../../pattern_api_v2/core_traits/trait.ReverseSearcher.html' title='pattern_api_v2::core_traits::ReverseSearcher'>ReverseSearcher</a>&lt;Self&gt;, Self: <a class='trait' href='../../pattern_api_v2/core_traits/trait.InverseMatchesAreValid.html' title='pattern_api_v2::core_traits::InverseMatchesAreValid'>InverseMatchesAreValid</a></span></code></h3><h3 id='method.split_terminator' class='method stab '><code>fn <a href='#method.split_terminator' class='fnname'>split_terminator</a>&lt;P: <a class='trait' href='../../pattern_api_v2/core_traits/trait.Pattern.html' title='pattern_api_v2::core_traits::Pattern'>Pattern</a>&lt;Self&gt;&gt;(self, pat: P) -&gt; <a class='struct' href='../../pattern_api_v2/iterators/struct.SplitTerminator.html' title='pattern_api_v2::iterators::SplitTerminator'>SplitTerminator</a>&lt;Self, P&gt; <span class='where'>where Self: <a class='trait' href='../../pattern_api_v2/core_traits/trait.InverseMatchesAreValid.html' title='pattern_api_v2::core_traits::InverseMatchesAreValid'>InverseMatchesAreValid</a></span></code></h3><h3 id='method.rsplit_terminator' class='method stab '><code>fn <a href='#method.rsplit_terminator' class='fnname'>rsplit_terminator</a>&lt;P: <a class='trait' href='../../pattern_api_v2/core_traits/trait.Pattern.html' title='pattern_api_v2::core_traits::Pattern'>Pattern</a>&lt;Self&gt;&gt;(self, pat: P) -&gt; <a class='struct' href='../../pattern_api_v2/iterators/struct.RSplitTerminator.html' title='pattern_api_v2::iterators::RSplitTerminator'>RSplitTerminator</a>&lt;Self, P&gt; <span class='where'>where P::Searcher: <a class='trait' href='../../pattern_api_v2/core_traits/trait.ReverseSearcher.html' title='pattern_api_v2::core_traits::ReverseSearcher'>ReverseSearcher</a>&lt;Self&gt;, Self: <a class='trait' href='../../pattern_api_v2/core_traits/trait.InverseMatchesAreValid.html' title='pattern_api_v2::core_traits::InverseMatchesAreValid'>InverseMatchesAreValid</a></span></code></h3><h3 id='method.matches' class='method stab '><code>fn <a href='#method.matches' class='fnname'>matches</a>&lt;P: <a class='trait' href='../../pattern_api_v2/core_traits/trait.Pattern.html' title='pattern_api_v2::core_traits::Pattern'>Pattern</a>&lt;Self&gt;&gt;(self, pat: P) -&gt; <a class='struct' href='../../pattern_api_v2/iterators/struct.Matches.html' title='pattern_api_v2::iterators::Matches'>Matches</a>&lt;Self, P&gt;</code></h3><h3 id='method.rmatches' class='method stab '><code>fn <a href='#method.rmatches' class='fnname'>rmatches</a>&lt;P: <a class='trait' href='../../pattern_api_v2/core_traits/trait.Pattern.html' title='pattern_api_v2::core_traits::Pattern'>Pattern</a>&lt;Self&gt;&gt;(self, pat: P) -&gt; <a class='struct' href='../../pattern_api_v2/iterators/struct.RMatches.html' title='pattern_api_v2::iterators::RMatches'>RMatches</a>&lt;Self, P&gt; <span class='where'>where P::Searcher: <a class='trait' href='../../pattern_api_v2/core_traits/trait.ReverseSearcher.html' title='pattern_api_v2::core_traits::ReverseSearcher'>ReverseSearcher</a>&lt;Self&gt;</span></code></h3><h3 id='method.match_indices' class='method stab '><code>fn <a href='#method.match_indices' class='fnname'>match_indices</a>&lt;P: <a class='trait' href='../../pattern_api_v2/core_traits/trait.Pattern.html' title='pattern_api_v2::core_traits::Pattern'>Pattern</a>&lt;Self&gt;&gt;(self, pat: P) -&gt; <a class='struct' href='../../pattern_api_v2/iterators/struct.MatchIndices.html' title='pattern_api_v2::iterators::MatchIndices'>MatchIndices</a>&lt;Self, P&gt;</code></h3><h3 id='method.rmatch_indices' class='method stab '><code>fn <a href='#method.rmatch_indices' class='fnname'>rmatch_indices</a>&lt;P: <a class='trait' href='../../pattern_api_v2/core_traits/trait.Pattern.html' title='pattern_api_v2::core_traits::Pattern'>Pattern</a>&lt;Self&gt;&gt;(self, pat: P) -&gt; <a class='struct' href='../../pattern_api_v2/iterators/struct.RMatchIndices.html' title='pattern_api_v2::iterators::RMatchIndices'>RMatchIndices</a>&lt;Self, P&gt; <span class='where'>where P::Searcher: <a class='trait' href='../../pattern_api_v2/core_traits/trait.ReverseSearcher.html' title='pattern_api_v2::core_traits::ReverseSearcher'>ReverseSearcher</a>&lt;Self&gt;</span></code></h3><h3 id='method.starts_with' class='method stab '><code>fn <a href='#method.starts_with' class='fnname'>starts_with</a>&lt;P: <a class='trait' href='../../pattern_api_v2/core_traits/trait.Pattern.html' title='pattern_api_v2::core_traits::Pattern'>Pattern</a>&lt;Self&gt;&gt;(self, pat: P) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h3><h3 id='method.ends_with' class='method stab '><code>fn <a href='#method.ends_with' class='fnname'>ends_with</a>&lt;P: <a class='trait' href='../../pattern_api_v2/core_traits/trait.Pattern.html' title='pattern_api_v2::core_traits::Pattern'>Pattern</a>&lt;Self&gt;&gt;(self, pat: P) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a> <span class='where'>where P::Searcher: <a class='trait' href='../../pattern_api_v2/core_traits/trait.ReverseSearcher.html' title='pattern_api_v2::core_traits::ReverseSearcher'>ReverseSearcher</a>&lt;Self&gt;</span></code></h3><h3 id='method.trim_matches' class='method stab '><code>fn <a href='#method.trim_matches' class='fnname'>trim_matches</a>&lt;P: <a class='trait' href='../../pattern_api_v2/core_traits/trait.Pattern.html' title='pattern_api_v2::core_traits::Pattern'>Pattern</a>&lt;Self&gt;&gt;(self, pat: P) -&gt; Self::<a class='trait' href='../../pattern_api_v2/std_integration/trait.IteratorConstructors.html' title='pattern_api_v2::std_integration::IteratorConstructors'>MatchType</a> <span class='where'>where P::Searcher: <a class='trait' href='../../pattern_api_v2/core_traits/trait.DoubleEndedSearcher.html' title='pattern_api_v2::core_traits::DoubleEndedSearcher'>DoubleEndedSearcher</a>&lt;Self&gt;</span></code></h3><h3 id='method.trim_left_matches' class='method stab '><code>fn <a href='#method.trim_left_matches' class='fnname'>trim_left_matches</a>&lt;P: <a class='trait' href='../../pattern_api_v2/core_traits/trait.Pattern.html' title='pattern_api_v2::core_traits::Pattern'>Pattern</a>&lt;Self&gt;&gt;(self, pat: P) -&gt; Self::<a class='trait' href='../../pattern_api_v2/std_integration/trait.IteratorConstructors.html' title='pattern_api_v2::std_integration::IteratorConstructors'>MatchType</a></code></h3><h3 id='method.trim_right_matches' class='method stab '><code>fn <a href='#method.trim_right_matches' class='fnname'>trim_right_matches</a>&lt;P: <a class='trait' href='../../pattern_api_v2/core_traits/trait.Pattern.html' title='pattern_api_v2::core_traits::Pattern'>Pattern</a>&lt;Self&gt;&gt;(self, pat: P) -&gt; Self::<a class='trait' href='../../pattern_api_v2/std_integration/trait.IteratorConstructors.html' title='pattern_api_v2::std_integration::IteratorConstructors'>MatchType</a> <span class='where'>where P::Searcher: <a class='trait' href='../../pattern_api_v2/core_traits/trait.ReverseSearcher.html' title='pattern_api_v2::core_traits::ReverseSearcher'>ReverseSearcher</a>&lt;Self&gt;</span></code></h3><h3 id='method.find' class='method stab '><code>fn <a href='#method.find' class='fnname'>find</a>&lt;P: <a class='trait' href='../../pattern_api_v2/core_traits/trait.Pattern.html' title='pattern_api_v2::core_traits::Pattern'>Pattern</a>&lt;Self&gt;&gt;(self, pat: P) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>&gt;</code></h3><h3 id='method.rfind' class='method stab '><code>fn <a href='#method.rfind' class='fnname'>rfind</a>&lt;P: <a class='trait' href='../../pattern_api_v2/core_traits/trait.Pattern.html' title='pattern_api_v2::core_traits::Pattern'>Pattern</a>&lt;Self&gt;&gt;(self, pat: P) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>&gt; <span class='where'>where P::Searcher: <a class='trait' href='../../pattern_api_v2/core_traits/trait.ReverseSearcher.html' title='pattern_api_v2::core_traits::ReverseSearcher'>ReverseSearcher</a>&lt;Self&gt;</span></code></h3></div>
+        <h2 id='implementors'>Implementors</h2>
+        <ul class='item-list' id='implementors-list'>
+    </ul><script type="text/javascript" async
+                         src="../../implementors/pattern_api_v2/std_integration/trait.IteratorConstructors.js">
+                 </script></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "pattern_api_v2";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script defer src="../../search-index.js"></script>
+</body>
+</html>

@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["ByteOptimization","`ByteOptimization` is a 64-bit \"fingerprint\" where each set bit `j` corresponds to a (byte & 63) == j present in the needle."],["Iter",""],["NoOptimization",""],["OrdSeqSearcher","Associated type for `<&str as Pattern<&'a str>>::Searcher`."],["OrdSlicePattern",""]],"trait":[["FastSkipOptimization",""],["OrdSlice",""]]});

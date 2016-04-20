@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["ElemPredicateSearcher","Associated type for `<F as Pattern<&'a str>>::Searcher`."],["ElemSearcher","Associated type for `<char as Pattern<&'a str>>::Searcher`."],["SliceSearcher",""]]});
